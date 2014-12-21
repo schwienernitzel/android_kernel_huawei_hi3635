@@ -1,5 +1,6 @@
 # Automatically generated file; DO NOT EDIT.
 # Linux/arm64 3.10.74 Kernel Configuration
+CONFIG_64BIT=y
 CONFIG_ARCH_HI3XXX=y
 CONFIG_HISI_3635=y
 CONFIG_HISILICON_PLATFORM=y
