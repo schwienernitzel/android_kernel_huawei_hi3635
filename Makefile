@@ -326,7 +326,7 @@ include $(srctree)/scripts/Kbuild.include
 
 AS		= $(SOURCEANALYZER) $(CROSS_COMPILE)as
 LD		= $(SOURCEANALYZER) $(CROSS_COMPILE)ld
-CC		= $(SOURCEANALYZER) $(CROSS_COMPILE)gcc
+CC		= $(SOURCEANALYZER) $(CCACHE) $(CROSS_COMPILE)gcc
 CPP		= $(CC) -E
 AR		= $(SOURCEANALYZER) $(CROSS_COMPILE)ar
 NM		= $(CROSS_COMPILE)nm
@@ -360,6 +360,10 @@ USERINCLUDE    := \
 
 # Use LINUXINCLUDE when you must reference the include/ directory.
 # Needed to be compatible with the O= option
+COMMON_HEAD := $(KBUILD_SRC)/drivers/
+ifneq ($(COMMON_HEAD),)
+BALONG_INC := $(patsubst %,-I%,$(COMMON_HEAD))
+endif
 LINUXINCLUDE    := \
 		-I$(srctree)/arch/$(hdr-arch)/include \
 		-Iarch/$(hdr-arch)/include/generated \
@@ -402,7 +406,6 @@ ifeq ($(strip $(FACTORY_SLT)),true)
 KBUILD_CFLAGS += -D__SLT_FEATURE__
 endif
 
-OBB_PRODUCT_NAME = hi3635_udp
 # add hisilicon balong configs
 ifneq ($(BALONG_TOPDIR),)
 -include $(BALONG_TOPDIR)/ap/config/product/$(OBB_PRODUCT_NAME)/config/balong_product_config.mk
@@ -420,9 +423,8 @@ KBUILD_AFLAGS += -DDRV_BUILD_SEPARATE
 KBUILD_CPPFLAGS += -DDRV_BUILD_SEPARATE
 endif
 OBB_PRODUCT_NAME = hi3635_udp
-OBB_PRODUCT_NAME = hi3635_udp
 ifneq ($(findstring hi3635, $(OBB_PRODUCT_NAME) ),)
-BALONG_TOPDIR = $(CURDIR)/../kernel/drivers/vendor/hisi
+BALONG_TOPDIR = $(KBUILD_SRC)/drivers/vendor/hisi
 OBB_PRODUCT_NAME = hi3635_udp
 CFG_PLATFORM = hi3630
 TARGET_ARM_TYPE = arm64
@@ -443,7 +445,6 @@ LINUXINCLUDE    += -I$(BALONG_TOPDIR)/config/product/$(OBB_PRODUCT_NAME)/config 
 -I$(BALONG_TOPDIR)/include/phy/lphy \
 -I$(BALONG_TOPDIR)/audiodsp/custom/hi6402_hifi/include/med \
 -I$(BALONG_TOPDIR)/include/taf \
--I$(BALONG_TOPDIR)/../.. \
 -I$(BALONG_TOPDIR)/modem/drv/common/include
 endif
 # add hisilicon balong configs end
@@ -763,6 +764,10 @@ LDFLAGS_BUILD_ID = $(patsubst -Wl$(comma)%,%,\
 			      $(call cc-ldoption, -Wl$(comma)--build-id,))
 KBUILD_LDFLAGS_MODULE += $(LDFLAGS_BUILD_ID)
 LDFLAGS_vmlinux += $(LDFLAGS_BUILD_ID)
+
+ifeq ($(ARCH),arm64)
+LDFLAGS_vmlinux += --fix-cortex-a53-843419
+endif
 
 ifeq ($(CONFIG_STRIP_ASM_SYMS),y)
 LDFLAGS_vmlinux	+= $(call ld-option, -X,)
