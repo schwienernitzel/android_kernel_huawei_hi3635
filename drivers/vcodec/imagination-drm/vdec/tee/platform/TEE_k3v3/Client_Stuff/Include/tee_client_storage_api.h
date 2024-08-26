@@ -1,0 +1,316 @@
+ï»¿/*!
+ *****************************************************************************
+ *
+ * @File       tee_client_storage_api.h
+ * ---------------------------------------------------------------------------
+ *
+ * Copyright (c) Imagination Technologies Ltd.
+ * 
+ * The contents of this file are subject to the MIT license as set out below.
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a 
+ * copy of this software and associated documentation files (the "Software"), 
+ * to deal in the Software without restriction, including without limitation 
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+ * and/or sell copies of the Software, and to permit persons to whom the 
+ * Software is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in 
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
+ * THE SOFTWARE.
+ * 
+ * Alternatively, the contents of this file may be used under the terms of the 
+ * GNU General Public License Version 2 ("GPL")in which case the provisions of
+ * GPL are applicable instead of those above. 
+ * 
+ * If you wish to allow use of your version of this file only under the terms 
+ * of GPL, and not to allow others to use your version of this file under the 
+ * terms of the MIT license, indicate your decision by deleting the provisions 
+ * above and replace them with the notice and other provisions required by GPL 
+ * as set out in the file called "GPLHEADER" included in this distribution. If 
+ * you do not delete the provisions above, a recipient may use your version of 
+ * this file under the terms of either the MIT license or GPL.
+ * 
+ * This License is also included in this distribution in the file called 
+ * "MIT_COPYING".
+ *
+ *****************************************************************************/
+
+#ifndef _TEE_CLIENT_STORAGE_API_H_
+#define _TEE_CLIENT_STORAGE_API_H_
+
+#include "tee_client_type.h"
+
+#define SFS_PROPERTY "trustedcore_sfs_property"
+#define SFS_PROPERTY_VALUE "1"
+/**
+ * @ingroup  TEEC_StorageAPI
+ *
+ * ´ò¿ªÎÄ¼şµÄÄ£Ê½
+ */
+enum Data_Flag_Constants{
+    TEE_DATA_FLAG_ACCESS_READ = 0x00000001,  /**< Ö»¶ÁÄ£Ê½ */
+    TEE_DATA_FLAG_ACCESS_WRITE = 0x00000002,  /**< Ö»Ğ´Ä£Ê½ */
+    TEE_DATA_FLAG_ACCESS_WRITE_META = 0x00000004,  /**< Èç¹û¶ÔÎÄ¼ş½øĞĞÉ¾³ı»ò¸ÄÃû²Ù×÷£¬
+    ±ØĞëÊ¹ÓÃ´ËÄ£Ê½ÏÈ´ò¿ªÎÄ¼ş */
+    TEE_DATA_FLAG_SHARE_READ = 0x00000010,  /**< ¹²Ïí¶ÁÄ£Ê½ £¬
+    Ö»ÓĞÔÚ´ËÄ£Ê½ÏÂ£¬²Å¿ÉÒÔÒÔ¶Á·½Ê½Í¬Ê±´ò¿ªÍ¬Ò»¸öÎÄ¼ş */
+    TEE_DATA_FLAG_SHARE_WRITE = 0x00000020,  /**< ¹²ÏíĞ´Ä£Ê½£¬
+    Ö»ÓĞÔÚ´ËÄ£Ê½ÏÂ£¬²Å¿ÉÒÔÒÔĞ´·½Ê½Í¬Ê±´ò¿ªÍ¬Ò»¸öÎÄ¼ş */
+    TEE_DATA_FLAG_CREATE = 0x00000200,  /**< ²»ÂÛÎÄ¼ş´æÔÚÓë·ñ£¬
+    ¾ù´´½¨ĞÂÎÄ¼ş£¬Èô´æÔÚÔò¸²¸ÇÔ­ÓĞÎÄ¼ş */
+    TEE_DATA_FLAG_EXCLUSIVE = 0x00000400,  /**< Èç¹ûÎÄ¼ş²»´æÔÚ£¬
+    Ôò´´½¨ÎÄ¼ş£¬·ñÔò±¨´í */
+};
+
+/**
+ * @ingroup  TEEC_StorageAPI
+ * @brief ´ò¿ª°²È«´æ´¢·şÎñ
+ *
+ * @par ÃèÊö:
+ * ´ò¿ª°²È«´æ´¢·şÎñ³É¹¦£¬ÊÇ¶ÔÎÄ¼ş²Ù×÷µÄÇ°Ìá
+ *
+ * @attention ÎŞ
+ * @param ÎŞ
+ *
+ * @retval #TEEC_SUCCESS ´ò¿ª°²È«´æ´¢·şÎñ³É¹¦
+ * @retval ÆäËü·µ»ØÖµ²Î¿¼ #TEEC_ReturnCode
+ *
+ * @par ÒÀÀµ:
+ * @li libteec£º¸Ã½Ó¿ÚËùÊôµÄ¹²Ïí¿â
+ * @li tee_client_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚÍ·ÎÄ¼ş
+ * @see TEEC_UninitStorageService
+ * @since V100R002C00B302
+ */
+TEEC_Result TEEC_InitStorageService();
+
+/**
+ * @ingroup  TEEC_StorageAPI
+ * @brief ¹Ø±Õ°²È«´æ´¢·şÎñ
+ *
+ * @par ÃèÊö:
+ * ¹Ø±Õ°²È«´æ´¢·şÎñ
+ *
+ * @attention ÎŞ
+ * @param ÎŞ
+ *
+ * @retval #TEEC_SUCCESS ¹Ø±Õ°²È«´æ´¢·şÎñ³É¹¦
+ * @retval #TEEC_ERROR_BAD_STATE °²È«´æ´¢·şÎñ´ÓÎ´´ò¿ª
+ *
+ * @par ÒÀÀµ:
+ * @li libteec£º¸Ã½Ó¿ÚËùÊôµÄ¹²Ïí¿â
+ * @li tee_client_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚÍ·ÎÄ¼ş
+ * @see TEEC_InitStorageService
+ * @since V100R002C00B302
+ */
+TEEC_Result TEEC_UninitStorageService();
+
+/**
+ * @ingroup  TEEC_StorageAPI
+ * @brief ´ò¿ªÎÄ¼ş
+ *
+ * @par ÃèÊö:
+ * ´ò¿ªÂ·¾¶ÎªpathµÄÎÄ¼ş£¬´ò¿ªÄ£Ê½ÊÇmode£¬È¡Öµ·¶Î§Îª#Data_Flag_Constants
+ *
+ * @attention ÎŞ
+ * @param path [IN] ÎÄ¼şÂ·¾¶
+ * @param mode [IN] ´ò¿ªÎÄ¼şµÄ·½Ê½£¬È¡Öµ·¶Î§Îª#Data_Flag_Constants
+ *
+ * @retval -1 ´ò¿ªÎÄ¼şÊ§°Ü£¬Ã»ÓĞ³õÊ¼»¯°²È«´æ´¢·şÎñ¡¢»òÎÄ¼ş²»´æÔÚ¡¢
+ * »ò²¢·¢·ÃÎÊÎÄ¼şÊ±È¨ÏŞĞ£ÑéÊ§°Ü£¬¿ÉÍ¨¹ı#TEEC_GetFErr»ñÈ¡´íÎóÂë
+ * @retval >=0 ´ò¿ªÎÄ¼ş³É¹¦£¬·µ»ØÎÄ¼şÃèÊö·û
+ *
+ * @par ÒÀÀµ:
+ * @li libteec£º¸Ã½Ó¿ÚËùÊôµÄ¹²Ïí¿â
+ * @li tee_client_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚÍ·ÎÄ¼ş
+ * @see TEEC_FClose
+ * @since V100R002C00B302
+ */
+int32_t TEEC_FOpen(char* path, uint32_t mode);
+
+/**
+ * @ingroup  TEEC_StorageAPI
+ * @brief ¹Ø±ÕÎÄ¼ş
+ *
+ * @par ÃèÊö:
+ * ¹Ø±ÕfdËùÖ¸ÏòµÄÎÄ¼ş
+ *
+ * @attention ÎŞ
+ * @param fd [IN] ÎÄ¼şÃèÊö·û
+ *
+ * @retval -1 ¹Ø±ÕÎÄ¼şÊ§°Ü£¬Ã»ÓĞ³õÊ¼»¯°²È«´æ´¢·şÎñ¡¢»ò²ÎÊıfdÎŞĞ§£¬
+ * ¿ÉÍ¨¹ı#TEEC_GetFErr»ñÈ¡´íÎóÂë
+ * @retval 0 ¹Ø±ÕÎÄ¼ş³É¹¦
+ *
+ * @par ÒÀÀµ:
+ * @li libteec£º¸Ã½Ó¿ÚËùÊôµÄ¹²Ïí¿â
+ * @li tee_client_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚÍ·ÎÄ¼ş
+ * @see TEEC_FOpen
+ * @since V100R002C00B302
+ */
+int32_t TEEC_FClose(int32_t fd);
+
+/**
+ * @ingroup  TEEC_StorageAPI
+ * @brief ¶ÁÈ¡ÎÄ¼ş
+ *
+ * @par ÃèÊö:
+ * ´Ó²ÎÊıfdËùÖ¸µÄÎÄ¼ş¶ÁÈ¡Êı¾İµ½bufÖĞ£¬×î¶à¶ÁÈ¡size¸ö×Ö½Ú
+ *
+ * @attention ÎŞ
+ * @param fd [IN] ÎÄ¼şÃèÊö·û
+ * @param buf [IN] ÎÄ¼ş¶ÁÈ¡ÄÚÈİ»º³åÇø
+ * @param size [IN] ĞèÒª¶ÁÈ¡µÄ´óĞ¡£¬ÒÔ×Ö½ÚÎªµ¥Î»£¬²»ÄÜ´óÓÚbufÖ¸ÏòµÄ»º³åÇø
+ *
+ * @retval Ğ¡ÓÚsize Êµ¼Ê¶ÁÈ¡µ½µÄ´óĞ¡£¬¶ÁÈ¡ÎÄ¼şÊ±·¢Éú´íÎó»òÓöµ½ÎÄ¼şÎ²£¬
+ * ¿ÉÍ¨¹ıº¯Êı#TEEC_GetFErr»ñÈ¡´íÎóÂë
+ * @retval µÈÓÚsize ¶ÁÈ¡³É¹¦
+ *
+ * @par ÒÀÀµ:
+ * @li libteec£º¸Ã½Ó¿ÚËùÊôµÄ¹²Ïí¿â
+ * @li tee_client_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚÍ·ÎÄ¼ş
+ * @see TEEC_FOpen | TEEC_FClose | TEEC_GetFErr
+ * @since V100R002C00B302
+ */
+size_t TEEC_FRead(int32_t fd, uint8_t* buf, size_t size);
+
+/**
+ * @ingroup  TEEC_StorageAPI
+ * @brief Ğ´ÈëÎÄ¼ş
+ *
+ * @par ÃèÊö:
+ * Ïò²ÎÊıfdËùÖ¸µÄÎÄ¼şĞ´ÈëÊı¾İbuf£¬×î¶àĞ´Èësize¸ö×Ö½Ú
+ *
+ * @attention ÎŞ
+ * @param fd [IN] ÎÄ¼şÃèÊö·û
+ * @param buf [IN] ÎÄ¼şĞ´ÈëÄÚÈİ»º³åÇø
+ * @param size [IN] ĞèÒªĞ´ÈëµÄ´óĞ¡£¬ÒÔ×Ö½ÚÎªµ¥Î»£¬²»ÄÜ´óÓÚbufÖ¸ÏòµÄ»º³åÇø
+ *
+ * @retval Ğ¡ÓÚsize Êµ¼ÊĞ´ÈëµÄ´óĞ¡£¬Ğ´ÈëÎÄ¼şÊ±·¢Éú´íÎó»òÓöµ½ÎÄ¼şÎ²£¬
+ * ¿ÉÍ¨¹ıº¯Êı#TEEC_GetFErr»ñÈ¡´íÎóÂë
+ * @retval µÈÓÚsize Ğ´Èë³É¹¦
+ *
+ * @par ÒÀÀµ:
+ * @li libteec£º¸Ã½Ó¿ÚËùÊôµÄ¹²Ïí¿â
+ * @li tee_client_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚÍ·ÎÄ¼ş
+ * @see TEEC_FOpen | TEEC_FClose | TEEC_GetFErr
+ * @since V100R002C00B302
+ */
+size_t TEEC_FWrite(int32_t fd, uint8_t* buf, size_t size);
+/**
+ * @ingroup  TEEC_StorageAPI
+ * @brief ÖØ¶¨Î»ÎÄ¼ş
+ *
+ * @par ÃèÊö:
+ * ÖØ¶¨Î»ÎÄ¼ş
+ *
+ * @attention ÎŞ
+ * @param ÎŞ
+ *
+ * @retval #TEEC_SUCCESS »ñÈ¡³É¹¦
+ * @retval
+ * @retval ÆäËü·µ»ØÖµ²Î¿¼ #TEEC_ReturnCode
+ *
+ * @par ÒÀÀµ:
+ * @li libteec£º¸Ã½Ó¿ÚËùÊôµÄ¹²Ïí¿â
+ * @li tee_client_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚÍ·ÎÄ¼ş
+ * @see TEEC_FOpen
+ * @since V100R003C00B061
+ */
+int32_t TEEC_FSeek(int32_t fd, int32_t offset, int32_t fromwhere);
+/**
+ * @ingroup  TEEC_StorageAPI
+ * @brief »ñÈ¡ÎÄ¼şĞÅÏ¢
+ *
+ * @par ÃèÊö:
+ * »ñÈ¡µ±Ç°ÎÄ¼şÎ»ÖÃÒÔ¼°ÎÄ¼ş³¤¶È
+ *
+ * @attention ÎŞ
+ * @param ÎŞ
+ *
+ * @retval #TEEC_SUCCESS »ñÈ¡³É¹¦
+ * @retval
+ * @retval ÆäËü·µ»ØÖµ²Î¿¼ #TEEC_ReturnCode
+ *
+ * @par ÒÀÀµ:
+ * @li libteec£º¸Ã½Ó¿ÚËùÊôµÄ¹²Ïí¿â
+ * @li tee_client_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚÍ·ÎÄ¼ş
+ * @see TEEC_FOpen
+ * @since V100R003C00B061
+ */
+size_t TEEC_FInfo(int32_t fd, uint32_t* pos, uint32_t* len);
+/**
+ * @ingroup  TEEC_StorageAPI
+ * @brief ¹Ø±Õ²¢É¾³ıÎÄ¼ş
+ *
+ * @par ÃèÊö:
+ * ¹Ø±Õ²¢É¾³ı¶ÔÓ¦ÎÄ¼ş
+ *
+ * @attention ÎŞ
+ * @param ÎŞ
+ *
+ * @retval #TEEC_SUCCESS É¾³ı³É¹¦
+ * @retval
+ * @retval ÆäËü·µ»ØÖµ²Î¿¼ #TEEC_ReturnCode
+ *
+ * @par ÒÀÀµ:
+ * @li libteec£º¸Ã½Ó¿ÚËùÊôµÄ¹²Ïí¿â
+ * @li tee_client_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚÍ·ÎÄ¼ş
+ * @see TEEC_FOpen
+ * @since V100R003C00B061
+ */
+int32_t TEEC_FCloseAndDelete(int32_t fd);
+
+/**
+ * @ingroup  TEEC_StorageAPI
+ * @brief syncÎÄ¼şµ½flash
+ *
+ * @par ÃèÊö:
+ * syncÎÄ¼şµ½flash
+ *
+ * @attention ÎŞ
+ * @param ÎŞ
+ *
+ * @retval #TEEC_SUCCESS É¾³ı³É¹¦
+ * @retval
+ * @retval ÆäËü·µ»ØÖµ²Î¿¼ #TEEC_ReturnCode
+ *
+ * @par ÒÀÀµ:
+ * @li libteec£º¸Ã½Ó¿ÚËùÊôµÄ¹²Ïí¿â
+ * @li tee_client_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚÍ·ÎÄ¼ş
+ * @see TEEC_FOpen
+ * @since V100R003C00B061
+ */
+int32_t TEEC_FSync(int32_t fd);
+
+/**
+ * @ingroup  TEEC_StorageAPI
+ * @brief »ñÈ¡´íÎóÂë
+ *
+ * @par ÃèÊö:
+ * »ñÈ¡°²È«´æ´¢·şÎñµÄ´íÎóÂë
+ *
+ * @attention ÎŞ
+ * @param ÎŞ
+ *
+ * @retval #TEEC_SUCCESS Ã»ÓĞ´íÎó²úÉú
+ * @retval #TEEC_ERROR_BAD_STATE °²È«´æ´¢·şÎñ´ÓÎ´´ò¿ª
+ * @retval ÆäËü·µ»ØÖµ²Î¿¼ #TEEC_ReturnCode
+ *
+ * @par ÒÀÀµ:
+ * @li libteec£º¸Ã½Ó¿ÚËùÊôµÄ¹²Ïí¿â
+ * @li tee_client_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚÍ·ÎÄ¼ş
+ * @see TEEC_FRead | TEEC_FWrite
+ * @since V100R002C00B302
+ */
+TEEC_Result TEEC_GetFErr();
+
+#endif
+

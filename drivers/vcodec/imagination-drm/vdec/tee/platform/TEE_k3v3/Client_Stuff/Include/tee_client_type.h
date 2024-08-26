@@ -1,0 +1,277 @@
+ï»¿/*!
+ *****************************************************************************
+ *
+ * @File       tee_client_type.h
+ * ---------------------------------------------------------------------------
+ *
+ * Copyright (c) Imagination Technologies Ltd.
+ * 
+ * The contents of this file are subject to the MIT license as set out below.
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a 
+ * copy of this software and associated documentation files (the "Software"), 
+ * to deal in the Software without restriction, including without limitation 
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+ * and/or sell copies of the Software, and to permit persons to whom the 
+ * Software is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in 
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
+ * THE SOFTWARE.
+ * 
+ * Alternatively, the contents of this file may be used under the terms of the 
+ * GNU General Public License Version 2 ("GPL")in which case the provisions of
+ * GPL are applicable instead of those above. 
+ * 
+ * If you wish to allow use of your version of this file only under the terms 
+ * of GPL, and not to allow others to use your version of this file under the 
+ * terms of the MIT license, indicate your decision by deleting the provisions 
+ * above and replace them with the notice and other provisions required by GPL 
+ * as set out in the file called "GPLHEADER" included in this distribution. If 
+ * you do not delete the provisions above, a recipient may use your version of 
+ * this file under the terms of either the MIT license or GPL.
+ * 
+ * This License is also included in this distribution in the file called 
+ * "MIT_COPYING".
+ *
+ *****************************************************************************/
+
+#ifndef _TEE_CLIENT_TYPE_H_
+#define _TEE_CLIENT_TYPE_H_
+
+#include "tee_client_constants.h"
+
+
+#ifndef ENABLE_LIN_SO_BUILD
+//DAB Added
+#ifndef size_t 
+#define size_t     unsigned int
+#endif
+
+/**
+ * @ingroup TEEC_COMMON_DATA
+ * ÎÞ·ûºÅÕûÐÍ¶¨Òå
+ */
+typedef unsigned int      uint32_t;
+/**
+ * @ingroup TEEC_COMMON_DATA
+ * ÓÐ·ûºÅÕûÐÍ¶¨Òå
+ */
+typedef signed int        int32_t;
+/**
+ * @ingroup TEEC_COMMON_DATA
+ * ÎÞ·ûºÅ¶ÌÕûÐÍ¶¨Òå
+ */
+typedef unsigned short    uint16_t;
+/**
+ * @ingroup TEEC_COMMON_DATA
+ * ÓÐ·ûºÅ¶ÌÕûÐÍ¶¨Òå
+ */
+typedef signed short      int16_t;
+/**
+ * @ingroup TEEC_COMMON_DATA
+ * ÎÞ·ûºÅ×Ö·ûÐÍ¶¨Òå
+ */
+typedef unsigned char     uint8_t;
+/**
+ * @ingroup TEEC_COMMON_DATA
+ * ÓÐ·ûºÅ×Ö·ûÐÍ¶¨Òå
+ */
+typedef signed char       int8_t;
+/**
+ * @ingroup TEEC_COMMON_DATA
+ * Êý¾Ý³¤¶ÈÀàÐÍ¶¨Òå
+ */
+
+
+/**
+ * @ingroup TEEC_COMMON_DATA
+ * ²¼¶ûÀàÐÍ¶¨Òå
+ */
+#ifndef bool
+#define bool    uint8_t
+#endif
+
+/**
+ * @ingroup TEEC_COMMON_DATA
+ * trueÖµµÄ¶¨Òå
+ */
+#ifndef true
+#define true    1
+#endif
+
+/**
+ * @ingroup TEEC_COMMON_DATA
+ * falseÖµµÄ¶¨Òå
+ */
+#ifndef false
+#define false   0
+#endif
+
+/**
+ * @ingroup TEEC_COMMON_DATA
+ * NULLÖµµÄ¶¨Òå
+ */
+#ifndef NULL
+#define NULL 0
+#endif
+
+#endif /* not ENABLE_LIN_SO_BUILD */
+#include "tee_client_list.h"
+#ifndef ENABLE_LIN_SO_BUILD
+
+/**
+ * @ingroup TEEC_COMMON_DATA
+ * º¯Êý·µ»ØÖµÀàÐÍ¶¨Òå
+ *
+ * ÓÃÓÚ±íÊ¾º¯Êý·µ»Ø½á¹û
+ */
+typedef uint32_t TEEC_Result;
+
+#endif /* not ENABLE_LIN_SO_BUILD */
+
+/**
+ * @ingroup TEEC_COMMON_DATA
+ * UUIDÀàÐÍ¶¨Òå
+ *
+ * UUIDÀàÐÍ×ñÑ­RFC4122 [2]£¬ÓÃÓÚ±êÊ¶°²È«·þÎñ
+ */
+typedef struct {
+    uint32_t timeLow;  /**< Ê±¼ä´ÁµÄµÍ4×Ö½Ú  */
+    uint16_t timeMid;  /**< Ê±¼ä´ÁµÄÖÐ2×Ö½Ú  */
+    uint16_t timeHiAndVersion;  /**< Ê±¼ä´ÁµÄ¸ß2×Ö½ÚÓë°æ±¾ºÅµÄ×éºÏ  */
+    uint8_t clockSeqAndNode[8];  /**< Ê±ÖÓÐòÁÐÓë½Úµã±êÊ¶·ûµÄ×éºÏ  */
+} TEEC_UUID;
+
+/**
+ * @ingroup TEEC_COMMON_DATA
+ * TEEC_Context½á¹¹ÌåÀàÐÍ¶¨Òå
+ *
+ * ÃèÊö¿Í»§¶ËÓ¦ÓÃÓë°²È«ÊÀ½çÖ®¼ä½¨Á¢µÄÁ´½Ó»·¾³
+ */
+typedef struct {
+    uint32_t fd;  /**< ÎÄ¼þÃèÊö·û  */
+    uint8_t *ta_path;
+    struct list_node session_list;  /**< »á»°Á´±í  */
+    struct list_node shrd_mem_list;  /**< ¹²ÏíÄÚ´æÁ´±í  */
+} TEEC_Context;
+
+/**
+ * @ingroup TEEC_COMMON_DATA
+ * TEEC_Session½á¹¹ÌåÀàÐÍ¶¨Òå
+ *
+ * ÃèÊö¿Í»§¶ËÓ¦ÓÃÓë°²È«ÊÀ½çÖ®¼ä½¨Á¢µÄ»á»°
+ */
+typedef struct {
+    uint32_t session_id;  /**< »á»°ID£¬ÓÉ°²È«ÊÀ½ç·µ»Ø  */
+    TEEC_UUID service_id;  /**< °²È«·þÎñµÄUUID£¬Ã¿¸ö°²È«·þÎñÓµÓÐÎ¨Ò»µÄUUID  */
+    uint32_t ops_cnt;  /**< ÔÚ»á»°ÄÚµÄ²Ù×÷Êý  */
+    struct list_node head;  /**< »á»°Á´±íÍ·  */
+    TEEC_Context* context;  /**< Ö¸Ïò»á»°ËùÊôµÄTEE»·¾³  */
+} TEEC_Session;
+
+/**
+ * @ingroup TEEC_COMMON_DATA
+ * TEEC_SharedMemory½á¹¹ÌåÀàÐÍ¶¨Òå
+ *
+ * ÃèÊöÒ»¿é¹²ÏíÄÚ´æ£¬¿ÉÒÔ×¢²á£¬Ò²¿ÉÒÔ·ÖÅä
+ */
+typedef struct {
+    void* buffer;  /**< ÄÚ´æÖ¸Õë  */
+    size_t size;  /**< ÄÚ´æ´óÐ¡  */
+    uint32_t flags;  /**< ÄÚ´æ±êÊ¶·û£¬ÓÃÓÚÇø±ðÊäÈë»òÊä³ö£¬È¡Öµ·¶Î§Îª#TEEC_SharedMemCtl  */
+    uint32_t ops_cnt;  /**< ÄÚ´æ²Ù×÷Êý  */
+    bool is_allocated;  /**< ÄÚ´æ·ÖÅä±êÊ¾·û£¬ÓÃÓÚÇø±ðÊÇ×¢²áµÄ£¬»¹ÊÇ·ÖÅäµÄ  */
+    struct list_node head;  /**< ¹²ÏíÄÚ´æÁ´±íÍ·  */
+    TEEC_Context* context;  /**< Ö¸ÏòËùÊôµÄTEE»·¾³ */
+} TEEC_SharedMemory;
+
+/**
+ * @ingroup TEEC_COMMON_DATA
+ * TEEC_TempMemoryReference½á¹¹ÌåÀàÐÍ¶¨Òå
+ *
+ * ÃèÊöÒ»¿éÁÙÊ±»º³åÇøÖ¸Õë\n
+ * ¿ÉÒÔÓÃÓÚ#TEEC_ParameterµÄÀàÐÍ£¬ÓëÆäÏà¶ÔÓ¦µÄÀàÐÍ¿ÉÒÔÊÇ
+ * #TEEC_MEMREF_TEMP_INPUT£¬ #TEEC_MEMREF_TEMP_OUTPUT£¬»ò#TEEC_MEMREF_TEMP_INOUT
+ */
+typedef struct {
+    void* buffer;  /**< ÁÙÊ±»º³åÇøÖ¸Õë  */
+    size_t size;  /**< ÁÙÊ±»º³åÇø´óÐ¡  */
+} TEEC_TempMemoryReference;
+
+/**
+ * @ingroup TEEC_COMMON_DATA
+ * TEEC_RegisteredMemoryReference½á¹¹ÌåÀàÐÍ¶¨Òå
+ *
+ * ÃèÊö¹²ÏíÄÚ´æÖ¸Õë£¬Ö¸ÏòÊÂÏÈ×¢²á»ò·ÖÅäºÃµÄ¹²ÏíÄÚ´æ\n
+ * ¿ÉÒÔÓÃÓÚ#TEEC_ParameterµÄÀàÐÍ£¬ÓëÆäÏà¶ÔÓ¦µÄÀàÐÍ¿ÉÒÔÊÇ
+ * #TEEC_MEMREF_WHOLE£¬ #TEEC_MEMREF_PARTIAL_INPUT£¬
+ * #TEEC_MEMREF_PARTIAL_OUTPUT£¬»ò #TEEC_MEMREF_PARTIAL_INOUT
+ */
+typedef struct {
+    TEEC_SharedMemory* parent;  /**< ¹²ÏíÄÚ´æÖ¸Õë  */
+    size_t size;  /**< ¹²ÏíÄÚ´æµÄÊ¹ÓÃ´óÐ¡  */
+    size_t offset;  /**< ¹²ÏíÄÚ´æµÄÊ¹ÓÃÆ«ÒÆ  */
+} TEEC_RegisteredMemoryReference;
+
+/**
+ * @ingroup TEEC_COMMON_DATA
+ * TEEC_Value½á¹¹ÌåÀàÐÍ¶¨Òå
+ *
+ * ÃèÊöÉÙÁ¿µÄÊý¾Ý\n
+ * ¿ÉÒÔÓÃÓÚ#TEEC_ParameterµÄÀàÐÍ£¬ÓëÆäÏà¶ÔÓ¦µÄÀàÐÍ¿ÉÒÔÊÇ
+ * #TEEC_VALUE_INPUT£¬ #TEEC_VALUE_OUTPUT£¬»ò#TEEC_VALUE_INOUT
+ */
+typedef struct {
+    uint32_t a;  /**< ÕûÐÍÊý¾Ýa  */
+    uint32_t b;  /**< ÕûÐÍÊý¾Ýb  */
+} TEEC_Value;
+
+/**
+ * @ingroup TEEC_COMMON_DATA
+ * TEEC_ParameterÁªºÏÌåÀàÐÍ¶¨Òå
+ *
+ * ÃèÊö#TEEC_OperationËù¶ÔÓ¦µÄ²ÎÊýÀàÐÍ
+ */
+typedef union {
+    TEEC_TempMemoryReference tmpref;  /**< ÃèÊö#TEEC_TempMemoryReferenceÀàÐÍ  */
+    TEEC_RegisteredMemoryReference memref;  /**< ÃèÊö#TEEC_RegisteredMemoryReferenceÀàÐÍ  */
+    TEEC_Value value;  /**< ÃèÊö#TEEC_ValueÀàÐÍ  */
+} TEEC_Parameter;
+
+/**
+ * @ingroup TEEC_COMMON_DATA
+ * TEEC_Operation½á¹¹ÌåÀàÐÍ¶¨Òå
+ *
+ * ´ò¿ª»á»°»ò·¢ËÍÃüÁîÊ±µÄ²ÎÊý¿ÉÒÔÍ¨¹ý´ËÀàÐÍÃèÊö£¬
+ * È¡Ïû²Ù×÷Ò²¿ÉÒÔÊ¹ÓÃ´Ë²ÎÊý
+ */
+typedef struct {
+    uint32_t started;  /**< ±êÊ¶ÊÇ·ñÊÇÈ¡Ïû²Ù×÷£¬0±íÊ¾È¡Ïû²Ù×÷  */
+    uint32_t paramTypes;  /**ÃèÊöparamsµÄ²ÎÊýÀàÐÍ#TEEC_ParamType£¬ÐèÒªÊ¹ÓÃºê#TEEC_PARAM_TYPES×éºÏ²ÎÊýÀàÐÍ */
+    TEEC_Parameter params[4];  /**< ²ÎÊýÄÚÈÝ£¬ÀàÐÍÎª#TEEC_Parameter  */
+    TEEC_Session *session;
+    bool cancel_flag;
+} TEEC_Operation;
+
+/**
+ * @ingroup TEEC_COMMON_DATA
+ * TEEC_EXT_TEEInfo½á¹¹ÌåÀàÐÍ¶¨Òå
+ *
+ * »ñÈ¡TEEµÄ°æ±¾ºÅºÍÆäËûÐÅÏ¢
+ */
+typedef struct {
+    uint32_t version;
+    uint32_t reserve1;
+    uint32_t reserve2;
+    uint32_t reserve3;
+} TEEC_EXT_TEEInfo;
+#endif
+

@@ -1,0 +1,1038 @@
+Ôªø/*!
+ *****************************************************************************
+ *
+ * @File       tee_crypto_api.h
+ * ---------------------------------------------------------------------------
+ *
+ * Copyright (c) Imagination Technologies Ltd.
+ * 
+ * The contents of this file are subject to the MIT license as set out below.
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a 
+ * copy of this software and associated documentation files (the "Software"), 
+ * to deal in the Software without restriction, including without limitation 
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+ * and/or sell copies of the Software, and to permit persons to whom the 
+ * Software is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in 
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
+ * THE SOFTWARE.
+ * 
+ * Alternatively, the contents of this file may be used under the terms of the 
+ * GNU General Public License Version 2 ("GPL")in which case the provisions of
+ * GPL are applicable instead of those above. 
+ * 
+ * If you wish to allow use of your version of this file only under the terms 
+ * of GPL, and not to allow others to use your version of this file under the 
+ * terms of the MIT license, indicate your decision by deleting the provisions 
+ * above and replace them with the notice and other provisions required by GPL 
+ * as set out in the file called "GPLHEADER" included in this distribution. If 
+ * you do not delete the provisions above, a recipient may use your version of 
+ * this file under the terms of either the MIT license or GPL.
+ * 
+ * This License is also included in this distribution in the file called 
+ * "MIT_COPYING".
+ *
+ *****************************************************************************/
+
+#ifndef TEE_CRYPTO_API_H
+#define TEE_CRYPTO_API_H
+
+#include "tee_internal_api.h"
+#include "tee_mem_mgmt_api.h"
+
+#ifndef NULL
+#define NULL            ((void *)0)
+#endif
+
+/** @defgroup crypto º”√‹∫ÕΩ‚√‹
+* @ingroup TEE_API
+*/
+
+/**
+ * @ingroup  crypto
+ * “‘±»ÃÿŒ™µ•Œªµƒ◊Ó¥Û√‹‘ø≥§∂»
+ *
+*/
+#define TEE_MAX_KEY_SIZE_IN_BITS 2048
+
+/**
+ * @ingroup  crypto
+ * RSA(π´‘øº”√‹À„∑®) √‹‘ø≥§∂»
+ *
+*/
+#define SW_RSA_KEYLEN 1024
+#if 1
+/**
+ * @ingroup  crypto
+ * √‹‘ø≈……˙ ±≤π≥‰Ω·ππÃÂ◊Ó¥Û◊÷Ω⁄
+ *
+*/
+#define TEE_DH_MAX_SIZE_OF_OTHER_INFO  64 /*bytes*/
+#endif
+/**
+ * @ingroup  crypto
+ *
+ * TEEµƒº”Ω‚√‹≤Ÿ◊˜√∂æŸ
+*/
+enum __TEE_Operation_Constants {
+    TEE_OPERATION_CIPHER = 0x1,         /**< º”Ω‚√‹ */
+    TEE_OPERATION_MAC,                  /**< MAC */
+    TEE_OPERATION_AE,                   /**< »œ÷§º”√‹ */
+    TEE_OPERATION_DIGEST,               /**< ’™“™ */
+    TEE_OPERATION_ASYMMETRIC_CIPHER,    /**< ∑«∂‘≥∆º”Ω‚√‹ */
+    TEE_OPERATION_ASYMMETRIC_SIGNATURE, /**< ∑«∂‘≥∆«©√˚ */
+    TEE_OPERATION_ASYMMETRIC_VERIFY,    /**< ∑«∂‘≥∆»œ÷§ */
+    TEE_OPERATION_KEY_DERIVATION        /**< √‹‘ø≈……˙ */
+};
+
+/**
+ * @ingroup  crypto
+ *
+ * TEEµƒº”Ω‚√‹À„∑®ID,∞¸¿®∂‘≥∆º”Ω‚√‹°¢∑«∂‘≥∆º”Ω‚√‹°¢’™“™HMACµ»\n
+ * ◊¢“‚:∂‘≥∆À„∑®÷–µƒnopadƒ£ Ω–Ë“™TA(Trusted Application£¨ø…–≈”¶”√)¿¥◊ˆÃÓ≥‰
+*/
+enum __TEE_CRYPTO_ALGORITHM_ID {
+    TEE_ALG_INVALID = 0x0,                              /**< Œﬁ–ßID */
+    TEE_ALG_AES_ECB_NOPAD =  0x10000010,                /**< AES_ECB_NOPAD */
+    TEE_ALG_AES_CBC_NOPAD = 0x10000110,                 /**< AES_CBC_NOPAD */
+    TEE_ALG_AES_CTR = 0x10000210,                       /**< AES_CTR */
+    TEE_ALG_AES_CTS = 0x10000310,                       /**< AES_CTS */
+    TEE_ALG_AES_XTS = 0x10000410,                       /**< AES_XTS */
+    TEE_ALG_AES_CBC_MAC_NOPAD = 0x30000110,             /**< AES_CBC_MAC_NOPAD */
+    TEE_ALG_AES_CBC_MAC_PKCS5 = 0x30000510,             /**< AES_CBC_MAC_PKCS5 */
+    TEE_ALG_AES_CMAC = 0x30000610,                      /**< AES_CMAC */
+    TEE_ALG_AES_CCM = 0x40000710,                       /**< AES_CCM */
+    TEE_ALG_AES_GCM = 0x40000810,                       /**< AES_GCM */
+    TEE_ALG_DES_ECB_NOPAD = 0x10000011,                 /**< DES_ECB_NOPAD */
+    TEE_ALG_DES_CBC_NOPAD = 0x10000111,                 /**< DES_CBC_NOPAD */
+    TEE_ALG_DES_CBC_MAC_NOPAD = 0x30000111,             /**< DES_CBC_MAC_NOPAD */
+    TEE_ALG_DES_CBC_MAC_PKCS5 = 0x30000511,             /**< DES_CBC_MAC_PKCS5 */
+    TEE_ALG_DES3_ECB_NOPAD = 0x10000013,                /**< DES3_ECB_NOPAD */
+    TEE_ALG_DES3_CBC_NOPAD = 0x10000113,                /**< DES3_CBC_NOPAD */
+    TEE_ALG_DES3_CBC_MAC_NOPAD = 0x30000113,            /**< DES3_CBC_MAC_NOPAD */
+    TEE_ALG_DES3_CBC_MAC_PKCS5 = 0x30000513,            /**< DES3_CBC_MAC_PKCS5 */
+    TEE_ALG_RSASSA_PKCS1_V1_5_MD5 = 0x70001830,         /**< RSASSA_PKCS1_V1_5_MD5 */
+    TEE_ALG_RSASSA_PKCS1_V1_5_SHA1 = 0x70002830,        /**< RSASSA_PKCS1_V1_5_SHA1 */
+    TEE_ALG_RSASSA_PKCS1_V1_5_SHA224 = 0x70003830,      /**< RSASSA_PKCS1_V1_5_SHA224 */
+    TEE_ALG_RSASSA_PKCS1_V1_5_SHA256 = 0x70004830,      /**< RSASSA_PKCS1_V1_5_SHA256 */
+    TEE_ALG_RSASSA_PKCS1_V1_5_SHA384 = 0x70005830,      /**< RSASSA_PKCS1_V1_5_SHA384 */
+    TEE_ALG_RSASSA_PKCS1_V1_5_SHA512 = 0x70006830,      /**< RSASSA_PKCS1_V1_5_SHA512 */
+    TEE_ALG_RSASSA_PKCS1_PSS_MGF1_SHA1 = 0x70212930,    /**< RSASSA_PKCS1_PSS_MGF1_SHA1 */
+    TEE_ALG_RSASSA_PKCS1_PSS_MGF1_SHA224 = 0x70313930,  /**< RSASSA_PKCS1_PSS_MGF1_SHA224 */
+    TEE_ALG_RSASSA_PKCS1_PSS_MGF1_SHA256 = 0x70414930,  /**< RSASSA_PKCS1_PSS_MGF1_SHA256 */
+    TEE_ALG_RSASSA_PKCS1_PSS_MGF1_SHA384 = 0x70515930,  /**< RSASSA_PKCS1_PSS_MGF1_SHA384 */
+    TEE_ALG_RSASSA_PKCS1_PSS_MGF1_SHA512 = 0x70616930,  /**< RSASSA_PKCS1_PSS_MGF1_SHA512 */
+    TEE_ALG_RSAES_PKCS1_V1_5 = 0x60000130,              /**< RSAES_PKCS1_V1_5 */
+    TEE_ALG_RSAES_PKCS1_OAEP_MGF1_SHA1 = 0x60210230,    /**< RSAES_PKCS1_OAEP_MGF1_SHA1 */
+    TEE_ALG_RSAES_PKCS1_OAEP_MGF1_SHA224 = 0x60211230,  /**< RSAES_PKCS1_OAEP_MGF1_SHA224 */
+    TEE_ALG_RSAES_PKCS1_OAEP_MGF1_SHA256 = 0x60212230,  /**< RSAES_PKCS1_OAEP_MGF1_SHA256 */
+    TEE_ALG_RSAES_PKCS1_OAEP_MGF1_SHA384 = 0x60213230,  /**< RSAES_PKCS1_OAEP_MGF1_SHA384 */
+    TEE_ALG_RSAES_PKCS1_OAEP_MGF1_SHA512 = 0x60214230,  /**< RSAES_PKCS1_OAEP_MGF1_SHA512 */
+    TEE_ALG_RSA_NOPAD = 0x60000030,                     /**< RSA_NOPAD */
+    TEE_ALG_DSA_SHA1 = 0x70002131,                      /**< DSA_SHA1 */
+    TEE_ALG_DH_DERIVE_SHARED_SECRET = 0x80000032,       /**< DH_DERIVE_SHARED_SECRET */
+    TEE_ALG_MD5 = 0x50000001,                           /**< MD5 */
+    TEE_ALG_SHA1 = 0x50000002,                          /**< SHA1 */
+    TEE_ALG_SHA224 = 0x50000003,                        /**< SHA224 */
+    TEE_ALG_SHA256 = 0x50000004,                        /**< SHA256 */
+    TEE_ALG_SHA384 = 0x50000005,                        /**< SHA384 */
+    TEE_ALG_SHA512 = 0x50000006,                        /**< SHA512 */
+    TEE_ALG_HMAC_MD5 = 0x30000001,                      /**< HMAC_MD5 */
+    TEE_ALG_HMAC_SHA1 = 0x30000002,                     /**< HMAC_SHA1 */
+    TEE_ALG_HMAC_SHA224 = 0x30000003,                   /**< HMAC_SHA224 */
+    TEE_ALG_HMAC_SHA256 = 0x30000004,                   /**< HMAC_SHA256 */
+    TEE_ALG_HMAC_SHA384 = 0x30000005,                   /**< HMAC_SHA384 */
+    TEE_ALG_HMAC_SHA512 = 0x30000006,                   /**< HMAC_SHA512 */
+	TEE_ALG_AES_ECB_PKCS5 = 0x10000020,                 /**< AES_ECB_PKCS5 */
+} ;
+/**
+ * @ingroup  crypto
+ *
+ * TEEµƒº”Ω‚√‹À„∑®ID…˘√˜
+*/
+typedef enum __TEE_CRYPTO_ALGORITHM_ID TEE_CRYPTO_ALGORITHM_ID;
+#if 1
+/**
+ * @ingroup  crypto
+ *
+ * TEEµƒ√‹‘ø≈……˙HASHƒ£ Ω
+*/
+typedef enum
+{
+    TEE_DH_HASH_SHA1_mode = 0,              /**< HASH_SHA1 */
+    TEE_DH_HASH_SHA224_mode = 1,            /**< HASH_SHA224 */
+    TEE_DH_HASH_SHA256_mode = 2,            /**< HASH_SHA256 */
+    TEE_DH_HASH_SHA384_mode = 3,            /**< HASH_SHA384 */
+    TEE_DH_HASH_SHA512_mode = 4,            /**< HASH_SHA512 */
+    TEE_DH_HASH_NumOfModes,                 /**< num of modes */
+}TEE_DH_HASH_Mode;
+
+/**
+ * @ingroup  crypto
+ *
+ * TEEµƒ√‹‘ø≈……˙DH–≠“È
+*/
+typedef enum
+{
+   TEE_DH_PKCS3_mode  = 0,              /**< PKCS3 */
+   TEE_DH_ANSI_X942_mode = 1,           /**< X942 */
+   TEE_DH_NumOfModes,                   /**< num of modes */
+}TEE_DH_OpMode_t;
+
+/**
+ * @ingroup  crypto
+ *
+ * TEEµƒ√‹‘ø≈……˙∫Ø ˝ƒ£ Ω
+*/
+typedef enum
+{
+    TEE_DH_ASN1_DerivMode = 0,                          /**< ASN1_DerivMode */
+    TEE_DH_ConcatDerivMode = 1,                         /**< ConcatDerivMode */
+    TEE_DH_X963_DerivMode = TEE_DH_ConcatDerivMode,     /**< X963_DerivMode */
+    TEE_DH_OMADRM_DerivMode = 2,                        /**< OMADRM_DerivMode */
+    TEE_DH_ISO18033_KDF1_DerivMode = 3,                 /**< ISO18033_KDF1_DerivMode */
+    TEE_DH_ISO18033_KDF2_DerivMode = 4,                 /**< ISO18033_KDF2_DerivMode */
+    TEE_DH_DerivFunc_NumOfModes,                        /**< num of modes */
+}TEE_DH_DerivFuncMode;
+#endif
+
+/**
+ * @ingroup  crypto
+ *
+ * TEEµƒ√‹‘ø≈……˙¿‡–Õ
+*/
+enum __TEE_DK_ObjectAttribute{
+    TEE_DK_SECRECT = 0,         /**< A pointer to shared secret value */
+    TEE_DK_OTHER,               /**< A pointer to structure containing other data */
+    TEE_DK_HASH_MODE,           /**< The enumerator ID of the HASH function to be used */
+    TEE_DK_DERIVATION_MODE      /**< The enumerator ID of the derivation function mode */
+};
+/**
+ * @ingroup  crypto
+ *
+ * TEEµƒ√‹‘ø≈……˙¿‡–Õ…˘√˜
+*/
+typedef enum __TEE_DK_ObjectAttribute TEE_DK_ObjectAttribute;
+/**
+ * @ingroup  crypto
+ *
+ * TEEµƒº”Ω‚√‹≤Ÿ◊˜ƒ£ Ω
+*/
+enum __TEE_OperationMode {
+    TEE_MODE_ENCRYPT = 0x0, /**< º”√‹ */
+    TEE_MODE_DECRYPT,       /**< Ω‚√‹ */
+    TEE_MODE_SIGN,          /**< «©√˚ */
+    TEE_MODE_VERIFY,        /**< —È÷§ */
+    TEE_MODE_MAC,           /**< MAC */
+    TEE_MODE_DIGEST,        /**< ’™“™ */
+    TEE_MODE_DERIVE        /**< ≈……˙ */
+} ;
+
+/**
+ * @ingroup  crypto
+ *
+ * TEEµƒº”Ω‚√‹≤Ÿ◊˜ƒ£ Ω…˘√˜
+*/
+typedef enum __TEE_OperationMode TEE_OperationMode;
+#if 1
+/**
+ * @ingroup  crypto
+ *
+ * TEE√‹‘ø≈……˙µƒother ˝æ›Ω·ππ, ∞¸∫¨¡À√‹‘ø≈……˙µƒ“ª–©ø…—° ˝æ›£¨≤ª–Ë“™‘Ú÷√NULL
+ */
+typedef struct
+{
+    uint8_t    AlgorithmID[TEE_DH_MAX_SIZE_OF_OTHER_INFO];  /**< objectŒ®“ª±Í æ(OID) */
+    uint32_t   SizeOfAlgorithmID;                           /**< AlgorithmIDµƒ≥§∂» */
+    uint8_t    PartyUInfo[TEE_DH_MAX_SIZE_OF_OTHER_INFO];   /**< ∑¢ÀÕ∑Ωµƒpublic–≈œ¢ */
+    uint32_t   SizeOfPartyUInfo;                            /**< PartyUInfoµƒ≥§∂» */
+    uint8_t    PartyVInfo[TEE_DH_MAX_SIZE_OF_OTHER_INFO];   /**< Ω” ’∑Ωµƒpublic–≈œ¢ */
+    uint32_t   SizeOfPartyVInfo;                            /**< PartyVInfo≥§∂» */
+    uint8_t    SuppPrivInfo[TEE_DH_MAX_SIZE_OF_OTHER_INFO]; /**< À´∑Ωπ≤”–µƒprivate–≈œ¢ */
+    uint32_t   SizeOfSuppPrivInfo;                          /**< SuppPrivInfoµƒ≥§∂» */
+    uint8_t    SuppPubInfo[TEE_DH_MAX_SIZE_OF_OTHER_INFO];  /**< À´∑Ωπ≤”–µƒpublic–≈œ¢ */
+    uint32_t   SizeOfSuppPubInfo;                           /**< SuppPubInfo≥§∂» */
+}TEE_DH_OtherInfo;
+#endif
+/**
+ * @ingroup  crypto
+ *
+ * TEEµƒº”Ω‚√‹≤Ÿ◊˜–≈œ¢£¨”√”⁄#TEE_GetOperationInfo()
+*/
+struct __TEE_OperationInfo {
+    uint32_t algorithm;         /**< #__TEE_CRYPTO_ALGORITHM_ID À„∑® */
+    uint32_t operationClass;    /**< #__TEE_Operation_Constants º”Ω‚√‹≤Ÿ◊˜ */
+    uint32_t mode;              /**< #__TEE_OperationMode º”Ω‚√‹≤Ÿ◊˜ƒ£ Ω */
+    uint32_t digestLength;      /**< ’™“™≥§∂» */
+    uint32_t maxKeySize;        /**< √‹‘ø◊Ó¥Û≥§∂» */
+    uint32_t keySize;           /**< √‹‘ø≥§∂» */
+    uint32_t requiredKeyUsage;  /**<  «∑Ò–Ë“™√‹‘ø */
+    uint32_t handleState;       /**< ≤Ÿ◊˜◊¥Ã¨ */
+    void *keyValue;             /**< √‹‘ø÷∏’Î */
+} ;
+/**
+ * @ingroup  crypto
+ *
+ * TEEµƒº”Ω‚√‹≤Ÿ◊˜–≈œ¢…˘√˜
+*/
+typedef struct __TEE_OperationInfo TEE_OperationInfo;
+
+/**
+ * @ingroup  crypto
+ *
+ * TEEµƒº”Ω‚√‹»´æ÷æ‰±˙
+*/
+struct __TEE_OperationHandle {
+    uint32_t algorithm;         /**< #__TEE_CRYPTO_ALGORITHM_ID À„∑® */
+    uint32_t operationClass;    /**< #__TEE_Operation_Constants º”Ω‚√‹≤Ÿ◊˜ */
+    uint32_t mode;              /**< #__TEE_OperationMode º”Ω‚√‹≤Ÿ◊˜ƒ£ Ω */
+    uint32_t digestLength;      /**< ’™“™≥§∂» */
+    uint32_t maxKeySize;        /**< √‹‘ø◊Ó¥Û≥§∂» */
+    uint32_t keySize;           /**< √‹‘ø≥§∂» */
+    uint32_t keySize2;          /**< √‹‘ø2≥§∂» */
+    uint32_t requiredKeyUsage;  /**<  «∑Ò–Ë“™√‹‘ø */
+    uint32_t handleState;       /**< ≤Ÿ◊˜◊¥Ã¨ */
+    void *keyValue;             /**< √‹‘øbuffer */
+    void *keyValue2;            /**< √‹‘ø2buffer */
+    void *crypto_ctxt;          /**< DXº”Ω‚√‹Ω·ππÃÂæ‰±˙ */
+    void *hmac_rest_ctext;      /**< DX hmac ∏¥Œªæ‰±˙ */
+    void *IV;                   /**< ≥ı ºªØœÚ¡ø÷∏’Î */
+    void* publicKey;            /**< π´‘ø÷∏’Î£¨∑«∂‘≥∆º”Ω‚√‹ π”√ */
+    uint32_t publicKeyLen;        /**< π´‘ø◊‹≥§∂»*/
+    void* privateKey;           /**< ÀΩ‘ø÷∏’Î£¨∑«∂‘≥∆º”Ω‚√‹ π”√ */
+    uint32_t privateKeyLen;        /**< ÀΩ‘ø◊‹≥§∂»*/
+    uint32_t IVLen;             /**< ≥ı ºªØœÚ¡ø≥§∂» */
+    //start of DH
+    TEE_DH_OtherInfo *dh_otherinfo;         /**< #TEE_DH_OtherInfo DH other ˝æ›Ω·ππ */
+    uint32_t dh_hash_mode;          /**< #TEE_DH_HASH_Mode DH hashƒ£ Ω */
+    uint32_t dh_derive_func;    /**< #TEE_DH_DerivFuncMode DH≈……˙∫Ø ˝ */
+    uint32_t dh_op_mode;             /**< #TEE_DH_OpMode_t DH–≠“È */
+    //end of DH
+};
+
+/**
+ * @ingroup  crypto
+ *
+ * ∑«∂‘≥∆º”Ω‚√‹π´‘øΩ·ππÃÂµƒ◊Ó¥Û÷µ
+ */
+#define RSA_PUBKEY_MAXSIZE sizeof(CRYS_RSAUserPubKey_t)
+
+/**
+ * @ingroup  crypto
+ *
+ * ∑«∂‘≥∆º”Ω‚√‹ÀΩ‘øΩ·ππÃÂµƒ◊Ó¥Û÷µ
+ */
+#define RSA_PRIVKEY_MAXSIZE sizeof(CRYS_RSAUserPrivKey_t)
+
+/**
+ * @ingroup  crypto
+ *
+ * TEEµƒº”Ω‚√‹»´æ÷æ‰±˙÷∏’Î…˘√˜
+*/
+typedef struct __TEE_OperationHandle* TEE_OperationHandle;
+/**
+ * @ingroup  crypto
+ *
+ * TEEµƒº”Ω‚√‹»´æ÷æ‰±˙…˘√˜
+*/
+typedef struct __TEE_OperationHandle TEE_OperationHandleVar;
+/**
+ * @ingroup  crypto
+ *
+ * TEEµƒobjectæ‰±˙…˘√˜
+*/
+typedef struct __TEE_ObjectHandle TEE_ObjectHandleVar;
+
+#if 0
+/*
+  This function print panic code.
+ */
+void TEE_Panic(TEE_Result panicCode);
+#endif
+/**
+ * @ingroup  crypto
+ * @brief TEE_AllocateOperation ∑÷≈‰º”Ω‚√‹◊ ‘¥
+ *
+ * @par √Ë ˆ:
+ * malloc #TEE_OperationHandle£¨Œ™–Ë“™‘À––µƒÀ„∑®∑÷≈‰◊ ‘¥£¨≥ı ºªØ≤ø∑÷±‰¡ø
+ *
+ * @attention ‘⁄Œ™’™“™∑÷≈‰◊ ‘¥µƒ ±∫Ú◊ˆ¡À≥ı ºªØ
+ * @param operation [IN/OUT]  ƒ£øÈæ‰±˙ #TEE_OperationHandle
+ * @param algorithm [IN]  º”Ω‚√‹À„∑® #TEE_CRYPTO_ALGORITHM_ID
+ * @param mode [IN]  º”Ω‚√‹ƒ£ Ω #TEE_OperationMode
+ * @param maxKeySize [IN]  ◊Ó¥Û√‹‘ø≥§∂» 64bytes
+ *
+ * @retval #TEE_SUCCESS ∞≤»´≤‡∑÷≈‰º”Ω‚√‹◊ ‘¥≥…π¶
+ * @retval #TEE_ERROR_OUT_OF_MEMORY #TEE_OperationHandle malloc ß∞‹
+ * @retval #TEE_ERROR_NOT_SUPPORTED À„∑®∏Ò Ω≤ª÷ß≥÷
+ * @retval #TEE_ERROR_GENERIC ”≤º˛º”Ω‚√‹µ◊≤„«˝∂Ø¥ÌŒÛ
+ *
+ * @par “¿¿µ:
+ * @li crypto º”Ω‚√‹ƒ£øÈ
+ * @li tee_crypto_api.h º”Ω‚√‹APIÕ∑Œƒº˛
+ * @see TEE_FreeOperation
+ * @since V100R002C00B302
+*/
+TEE_Result TEE_AllocateOperation(TEE_OperationHandle *operation,
+                    uint32_t algorithm, uint32_t mode,uint32_t maxKeySize);
+/**
+ * @ingroup  crypto
+ * @brief TEE_FreeOperation  Õ∑≈º”Ω‚√‹◊ ‘¥
+ *
+ * @par √Ë ˆ:
+ * free TEE_OperationHandle£¨ Õ∑≈º”Ω‚√‹œ‡πÿµƒ◊ ‘¥
+ *
+ * @attention Œﬁ
+ * @param operation [IN/OUT]  ƒ£øÈæ‰±˙
+ *
+ * @retval Œﬁ
+ *
+ * @par “¿¿µ:
+ * @li crypto º”Ω‚√‹ƒ£øÈ
+ * @li tee_crypto_api.h º”Ω‚√‹APIÕ∑Œƒº˛
+ * @see TEE_AllocateOperation
+ * @since V100R002C00B302
+*/
+void TEE_FreeOperation(TEE_OperationHandle operation);
+/**
+ * @ingroup  crypto
+ * @brief TEE_GetOperationInfo ªÒ»°º”Ω‚√‹–≈œ¢
+ *
+ * @par √Ë ˆ:
+ * ªÒ»°ƒ£øÈæ‰±˙µƒº”Ω‚√‹–≈œ¢£¨±£¥ÊµΩoperationInfo÷–
+ *
+ * @attention Œﬁ
+ * @param operation [IN/OUT]  ƒ£øÈæ‰±˙ #TEE_OperationHandle
+ * @param operationInfo [IN/OUT]  º”Ω‚√‹–≈œ¢ #TEE_OperationInfo
+ *
+ * @retval Œﬁ
+ *
+ * @par “¿¿µ:
+ * @li crypto º”Ω‚√‹ƒ£øÈ
+ * @li tee_crypto_api.h º”Ω‚√‹APIÕ∑Œƒº˛
+ * @see Œﬁ
+ * @since V100R002C00B302
+*/
+void TEE_GetOperationInfo(TEE_OperationHandle operation,
+                TEE_OperationInfo* operationInfo);
+/**
+ * ingroup  crypto
+ * @brief ÷ÿ÷√º”Ω‚√‹ƒ£øÈæ‰±˙
+ *
+ * @par √Ë ˆ:
+ * ÷ÿ÷√º”Ω‚√‹ƒ£øÈæ‰±˙
+ *
+ * @attention Œﬁ
+ * @param operation [IN/OUT]  ƒ£øÈæ‰±˙ #TEE_OperationHandle
+ *
+ * @retval Œﬁ
+ *
+ * @par “¿¿µ:
+ * @li crypto º”Ω‚√‹ƒ£øÈ
+ * @li tee_crypto_api.h º”Ω‚√‹APIÕ∑Œƒº˛
+ * @see Œﬁ
+ * @since V100R002C00B302
+*/
+void TEE_ResetOperation(TEE_OperationHandle operation);
+/**
+ * @ingroup  crypto
+ * @brief …Ë÷√º”Ω‚√‹ƒ£øÈ√‹‘ø
+ *
+ * @par √Ë ˆ:
+ * …Ë÷√º”Ω‚√‹ƒ£øÈ√‹‘ø
+ *
+ * @attention Œﬁ
+ * @param operation [IN/OUT]  ƒ£øÈæ‰±˙ #TEE_OperationHandle
+ * @param key [IN/OUT]  √‹‘øæ‰±˙ #TEE_ObjectHandle
+ *
+ * @retval #TEE_SUCCESS …Ë÷√√‹‘ø≥…π¶
+ * @retval #TEE_ERROR_BAD_PARAMETERS  ≤Œ ˝Œ™NULL£¨ªÚ’ﬂ≤Œ ˝¥ÌŒÛ
+ * @retval #TEE_ERROR_OUT_OF_MEMORY  √‹‘øbuffer∑÷≈‰ ß∞‹
+ *
+ * @par “¿¿µ:
+ * @li crypto º”Ω‚√‹ƒ£øÈ
+ * @li tee_crypto_api.h º”Ω‚√‹APIÕ∑Œƒº˛
+ * @see TEE_SetOperationKey2
+ * @since V100R002C00B302
+*/
+TEE_Result TEE_SetOperationKey(TEE_OperationHandle operation,TEE_ObjectHandle key);
+/**
+ * ingroup  crypto
+ * @brief …Ë÷√º”Ω‚√‹ƒ£øÈ√‹‘ø1∫Õ√‹‘ø2
+ *
+ * @par √Ë ˆ:
+ * …Ë÷√º”Ω‚√‹ƒ£øÈ√‹‘ø1∫Õ√‹‘ø2
+ *
+ * @attention Œﬁ
+ * @param operation [IN/OUT]  ƒ£øÈæ‰±˙ #TEE_OperationHandle
+ * @param key1 [IN/OUT]  √‹‘ø1æ‰±˙ #TEE_ObjectHandle
+ * @param key2 [IN/OUT]  √‹‘ø2æ‰±˙ #TEE_ObjectHandle
+ *
+ * @retval #TEE_SUCCESS …Ë÷√2∏ˆ√‹‘ø≥…π¶
+ * @retval #TEE_ERROR_BAD_PARAMETERS  ≤Œ ˝Œ™NULL£¨ªÚ’ﬂ≤Œ ˝¥ÌŒÛ
+ *
+ * @par “¿¿µ:
+ * @li crypto º”Ω‚√‹ƒ£øÈ
+ * @li tee_crypto_api.h º”Ω‚√‹APIÕ∑Œƒº˛
+ * @see TEE_SetOperationKey
+ * @since V100R002C00B302
+*/
+TEE_Result TEE_SetOperationKey2(TEE_OperationHandle operation,TEE_ObjectHandle key1,TEE_ObjectHandle key2);
+/**
+ * @ingroup  crypto
+ * @brief øΩ±¥º”Ω‚√‹ƒ£øÈæ‰±˙µΩ¡Ì“ª∏ˆæ‰±˙
+ *
+ * @par √Ë ˆ:
+ * øΩ±¥º”Ω‚√‹ƒ£øÈæ‰±˙µΩ¡Ì“ª∏ˆæ‰±˙
+ *
+ * @attention Œﬁ
+ * @param dstOperation [IN/OUT]  ƒø±Íƒ£øÈæ‰±˙ #TEE_OperationHandle
+ * @param srcOperation [IN/OUT]  ‘¥ƒ£øÈæ‰±˙ #TEE_OperationHandle
+ *
+ * @retval Œﬁ
+ *
+ * @par “¿¿µ:
+ * @li crypto º”Ω‚√‹ƒ£øÈ
+ * @li tee_crypto_api.h º”Ω‚√‹APIÕ∑Œƒº˛
+ * @see Œﬁ
+ * @since V100R002C00B302
+*/
+void TEE_CopyOperation(TEE_OperationHandle dstOperation,TEE_OperationHandle srcOperation);
+/**
+ * @ingroup  crypto
+ * @brief º”Ω‚√‹≥ı ºªØ
+ *
+ * @par √Ë ˆ:
+ * º”Ω‚√‹≥ı ºªØ£¨∞¸¿®AES∫ÕDES≥ı ºªØ
+ *
+ * @attention Œﬁ
+ * @param operation [IN/OUT]  ƒ£øÈæ‰±˙ #TEE_OperationHandle
+ * @param IV [IN]  ≥ı ºªØœÚ¡ø÷∏’Î£¨»Áπ˚≤ª–Ë“™≥ı ºªØœÚ¡øµƒª∞…ËŒ™NULL
+ * @param IVLen [IN]  ≥ı ºªØœÚ¡ø≥§∂»£¨
+ *
+ * @retval Œﬁ
+ *
+ * @par “¿¿µ:
+ * @li crypto º”Ω‚√‹ƒ£øÈ
+ * @li tee_crypto_api.h º”Ω‚√‹APIÕ∑Œƒº˛
+ * @see TEE_CipherUpdate | TEE_CipherDoFinal
+ * @since V100R002C00B302
+*/
+void TEE_CipherInit(TEE_OperationHandle operation,void* IV, size_t IVLen);
+/**
+ * @ingroup  crypto
+ * @brief º”Ω‚√‹‘ÀÀ„
+ *
+ * @par √Ë ˆ:
+ * º”Ω‚√‹‘ÀÀ„£¨∞¸¿®AES∫ÕDES‘ÀÀ„
+ *
+ * @attention Œﬁ
+ * @param operation [IN/OUT]  ƒ£øÈæ‰±˙ #TEE_OperationHandle
+ * @param srcData [IN]   ‰»Îº”√‹/Ω‚√‹ ˝æ›÷∏’Î
+ * @param srcLen [IN]   ‰»Îº”√‹/Ω‚√‹ ˝æ›≥§∂» AES ˝æ›≥§∂»Œ™16◊÷Ω⁄±∂ ˝£¨DES ˝æ›≥§∂»Œ™8◊÷Ω⁄±∂ ˝
+ * @param destData [OUT]  ‰≥ˆΩ‚√‹/º”√‹ ˝æ›÷∏’Î
+ * @param destLen [OUT]  ‰≥ˆΩ‚√‹/º”√‹ ˝æ›≥§∂»
+ *
+ * @retval #TEE_SUCCESS º”Ω‚√‹‘ÀÀ„≥…π¶
+ * @retval #TEE_ERROR_BAD_PARAMETERS ≤Œ ˝Œ™NULL£¨ªÚ¥´»Î¥ÌŒÛ
+ * @retval #TEE_ERROR_GENERIC ”≤º˛º”Ω‚√‹µ◊≤„«˝∂Ø¥ÌŒÛ
+ *
+ * @par “¿¿µ:
+ * @li crypto º”Ω‚√‹ƒ£øÈ
+ * @li tee_crypto_api.h º”Ω‚√‹APIÕ∑Œƒº˛
+ * @see TEE_CipherInit | TEE_CipherDoFinal
+ * @since V100R002C00B302
+*/
+TEE_Result TEE_CipherUpdate(TEE_OperationHandle operation,
+        void* srcData, size_t srcLen,void* destData, size_t *destLen);
+/**
+ * @ingroup  crypto
+ * @brief º”Ω‚√‹‘ÀÀ„Ω· ¯
+ *
+ * @par √Ë ˆ:
+ * º”Ω‚√‹‘ÀÀ„Ω· ¯£¨÷ª”–AES–Ë“™÷¥––¥ÀΩ”ø⁄£¨DES≤ª–Ë“™
+ *
+ * @param operation [IN/OUT]  ƒ£øÈæ‰±˙ #TEE_OperationHandle
+ * @param srcData [IN]   ‰»Îº”√‹/Ω‚√‹ ˝æ›÷∏’Î
+ * @param srcLen [IN]   ‰»Îº”√‹/Ω‚√‹ ˝æ›≥§∂» AES ˝æ›≥§∂»Œ™16◊÷Ω⁄±∂ ˝£¨DES ˝æ›≥§∂»Œ™8◊÷Ω⁄±∂ ˝
+ * @param destData [OUT]  ‰≥ˆΩ‚√‹/º”√‹ ˝æ›÷∏’Î
+ * @param destLen [OUT]  ‰≥ˆΩ‚√‹/º”√‹ ˝æ›≥§∂»
+ *
+ * @retval #TEE_SUCCESS º”Ω‚√‹Ω· ¯≥…π¶
+ * @retval #TEE_ERROR_BAD_PARAMETERS ≤Œ ˝Œ™NULL£¨ªÚ¥´»Î¥ÌŒÛ
+ * @retval #TEE_ERROR_GENERIC ”≤º˛º”Ω‚√‹µ◊≤„«˝∂Ø¥ÌŒÛ
+ *
+ * @par “¿¿µ:
+ * @li crypto º”Ω‚√‹ƒ£øÈ
+ * @li tee_crypto_api.h º”Ω‚√‹APIÕ∑Œƒº˛
+ * @see TEE_CipherInit | TEE_CipherUpdate
+ * @since V100R002C00B302
+*/
+TEE_Result TEE_CipherDoFinal(TEE_OperationHandle operation,
+        void* srcData, size_t srcLen,void* destData, size_t *destLen);
+/**
+ * @ingroup  crypto
+ * @brief ’™“™‘ÀÀ„
+ *
+ * @par √Ë ˆ:
+ * ’™“™‘ÀÀ„£¨÷ß≥÷SHA1£¨SHA224£¨SHA256£¨SHA384£¨SHA512
+ *
+ * @attention ≤ª÷ß≥÷MD5
+ * @param operation [IN/OUT]  ƒ£øÈæ‰±˙ #TEE_OperationHandle
+ * @param chunk [IN]   ‰»Î ˝æ›÷∏’Î
+ * @param chunkSize [IN]   ‰»Î ˝æ›≥§∂»
+ *
+ * @retval #TEE_SUCCESS ’™“™‘ÀÀ„≥…π¶
+ * @retval #TEE_ERROR_GENERIC ”≤º˛º”Ω‚√‹µ◊≤„«˝∂Ø¥ÌŒÛ
+ *
+ * @par “¿¿µ:
+ * @li crypto º”Ω‚√‹ƒ£øÈ
+ * @li tee_crypto_api.h º”Ω‚√‹APIÕ∑Œƒº˛
+ * @see TEE_DigestDoFinal
+ * @since V100R002C00B302
+*/
+TEE_Result TEE_DigestUpdate(TEE_OperationHandle operation, void* chunk, size_t chunkSize);
+/**
+ * @ingroup  crypto
+ * @brief ’™“™‘ÀÀ„Ω· ¯
+ *
+ * @par √Ë ˆ:
+ * ’™“™‘ÀÀ„Ω· ¯£¨÷ß≥÷SHA1£¨SHA224£¨SHA256£¨SHA384£¨SHA512
+ *
+ * @attention ≤ª÷ß≥÷MD5
+ * @param operation [IN/OUT]  ƒ£øÈæ‰±˙ #TEE_OperationHandle
+ * @param chunk [IN]   ‰»Î ˝æ›÷∏’Î
+ * @param chunkSize [IN]   ‰»Î ˝æ›≥§∂»
+ * @param hash [OUT]   ‰≥ˆ’™“™ ˝æ›÷∏’Î
+ * @param hashLen [OUT]   ‰≥ˆ’™“™ ˝æ›≥§∂» πÃ∂®≥§∂»«“”ÎÀ„∑®”–πÿ
+ *
+ * @retval #TEE_SUCCESS ’™“™Ω· ¯≥…π¶
+ * @retval #TEE_ERROR_GENERIC ”≤º˛º”Ω‚√‹µ◊≤„«˝∂Ø¥ÌŒÛ
+ *
+ * @par “¿¿µ:
+ * @li crypto º”Ω‚√‹ƒ£øÈ
+ * @li tee_crypto_api.h º”Ω‚√‹APIÕ∑Œƒº˛
+ * @see TEE_DigestUpdate
+ * @since V100R002C00B302
+*/
+TEE_Result TEE_DigestDoFinal(TEE_OperationHandle operation,
+        void* chunk, size_t chunkLen,void* hash, size_t *hashLen);
+/**
+ * @ingroup  crypto
+ * @brief MAC≥ı ºªØ
+ *
+ * @par √Ë ˆ:
+ * MAC≥ı ºªØ£¨÷ß≥÷SHA1£¨SHA224£¨SHA256£¨SHA384£¨SHA512
+ *
+ * @attention ≤ª÷ß≥÷MD5
+ * @param operation [IN/OUT]  ƒ£øÈæ‰±˙ #TEE_OperationHandle
+ * @param IV [IN]  ≥ı ºªØœÚ¡ø÷∏’Î
+ * @param IVLen [IN]  ≥ı ºªØœÚ¡ø≥§∂»
+ *
+ * @retval Œﬁ
+ *
+ * @par “¿¿µ:
+ * @li crypto º”Ω‚√‹ƒ£øÈ
+ * @li tee_crypto_api.h º”Ω‚√‹APIÕ∑Œƒº˛
+ * @see TEE_MACUpdate | TEE_MACComputeFinal | TEE_MACCompareFinal
+ * @since V100R002C00B302
+*/
+void TEE_MACInit(TEE_OperationHandle operation, void* IV, size_t IVLen);
+/**
+ * @ingroup  crypto
+ * @brief MAC‘ÀÀ„
+ *
+ * @par √Ë ˆ:
+ * MAC‘ÀÀ„£¨÷ß≥÷SHA1£¨SHA224£¨SHA256£¨SHA384£¨SHA512
+ *
+ * @attention ≤ª÷ß≥÷MD5
+ * @param operation [IN/OUT]  ƒ£øÈæ‰±˙ #TEE_OperationHandle
+ * @param chunk [IN]   ‰»Î ˝æ›÷∏’Î
+ * @param chunkSize [IN]   ‰»Î ˝æ›≥§∂»
+ *
+ * @retval Œﬁ
+ *
+ * @par “¿¿µ:
+ * @li crypto º”Ω‚√‹ƒ£øÈ
+ * @li tee_crypto_api.h º”Ω‚√‹APIÕ∑Œƒº˛
+ * @see TEE_MACInit | TEE_MACComputeFinal | TEE_MACCompareFinal
+ * @since V100R002C00B302
+*/
+void TEE_MACUpdate(TEE_OperationHandle operation,void* chunk, size_t chunkSize);
+/**
+ * @ingroup  crypto
+ * @brief MAC‘ÀÀ„Ω· ¯
+ *
+ * @par √Ë ˆ:
+ * MAC‘ÀÀ„Ω· ¯£¨÷ß≥÷SHA1£¨SHA224£¨SHA256£¨SHA384£¨SHA512
+ *
+ * @attention ≤ª÷ß≥÷MD5
+ * @param operation [IN/OUT]  ƒ£øÈæ‰±˙ #TEE_OperationHandle
+ * @param message [IN]   ‰»Î±»Ωœ ˝æ›÷∏’Î
+ * @param messageLen [IN]   ‰»Î±»Ωœ ˝æ›≥§∂»
+ * @param mac [OUT]  ‰≥ˆ’™“™ ˝æ›÷∏’Î
+ * @param macLen [OUT]  ‰≥ˆ’™“™ ˝æ›≥§∂»
+ *
+ * @retval #TEE_SUCCESS MACΩ· ¯≥…π¶
+ * @retval #TEE_ERROR_GENERIC ”≤º˛º”Ω‚√‹µ◊≤„«˝∂Ø¥ÌŒÛ
+ *
+ * @par “¿¿µ:
+ * @li crypto º”Ω‚√‹ƒ£øÈ
+ * @li tee_crypto_api.h º”Ω‚√‹APIÕ∑Œƒº˛
+ * @see TEE_MACInit | TEE_MACUpdate | TEE_MACCompareFinal
+ * @since V100R002C00B302
+*/
+TEE_Result TEE_MACComputeFinal(TEE_OperationHandle operation,
+        void* message, size_t messageLen,void* mac, size_t *macLen);
+/**
+ * @ingroup  crypto
+ * @brief MAC‘ÀÀ„Ω· ¯£¨≤¢Ω´Ω·π˚∫Õ ‰»Î ˝æ›±»Ωœ
+ *
+ * @par √Ë ˆ:
+ * MAC‘ÀÀ„Ω· ¯£¨÷ß≥÷SHA1£¨SHA224£¨SHA256£¨SHA384£¨SHA512
+ *
+ * @attention ≤ª÷ß≥÷MD5
+ * @param operation [IN/OUT]  ƒ£øÈæ‰±˙
+ * @param message [IN]   ‰»Î±»Ωœ ˝æ›÷∏’Î
+ * @param messageLen [IN]   ‰»Î±»Ωœ ˝æ›≥§∂»
+ * @param mac [IN]  ‰≥ˆ’™“™ ˝æ›÷∏’Î
+ * @param macLen [IN]  ‰≥ˆ’™“™ ˝æ›≥§∂»
+ *
+ * @retval #TEE_SUCCESS MAC—È÷§≥…π¶
+ * @retval #TEE_ERROR_GENERIC ”≤º˛º”Ω‚√‹µ◊≤„«˝∂Ø¥ÌŒÛ
+ * @retval #TEE_ERROR_MAC_INVALID –£—È ß∞‹
+ *
+ * @par “¿¿µ:
+ * @li crypto º”Ω‚√‹ƒ£øÈ
+ * @li tee_crypto_api.h º”Ω‚√‹APIÕ∑Œƒº˛
+ * @see TEE_MACInit | TEE_MACUpdate | TEE_MACComputeFinal
+ * @since V100R002C00B302
+*/
+TEE_Result TEE_MACCompareFinal(TEE_OperationHandle operation,
+        void* message, size_t messageLen,void* mac, size_t *macLen);
+/**
+ * @ingroup  crypto
+ * @brief ∏˘æ›¥´»Î≤Œ ˝…˙≥…≈‰∂‘π´ÀΩ‘ø
+ *
+ * @par √Ë ˆ:
+ * ∏˘æ›¥´»Î≤Œ ˝…˙≥…≈‰∂‘π´ÀΩ‘ø£¨”√”⁄∫Û∆⁄µƒ√‹‘ø≈……˙£¨∏√Ω”ø⁄TEEŒ¥Ã·π©£¨ Ù”⁄◊‘∂®“ÂΩ”ø⁄
+ *
+ * @attention ≤Œ ˝≈≈¡–Ω‚Œˆ«Îø™∑¢Œƒµµ
+ * @param operation [IN/OUT]  ƒ£øÈæ‰±˙ #TEE_OperationHandle
+ * @param params [IN]  ≤Œ ˝ ˝æ›÷∏’Î #TEE_Attribute
+ * @param paramCount [IN]  ≤Œ ˝ ˝æ›∏ˆ ˝
+ *
+ * @retval Œﬁ
+ *
+ * @par “¿¿µ:
+ * @li crypto º”Ω‚√‹ƒ£øÈ
+ * @li tee_crypto_api.h º”Ω‚√‹APIÕ∑Œƒº˛
+ * @see Œﬁ
+ * @since V100R002C00B302
+*/
+void GeneratePubPrv(TEE_OperationHandle operation, TEE_Attribute* params, uint32_t paramCount);
+/**
+ * @ingroup  crypto
+ * @brief ∏˘æ›¥´»Î≤Œ ˝≈……˙√‹‘ø
+ *
+ * @par √Ë ˆ:
+ * ∏˘æ›¥´»Î≤Œ ˝≈……˙√‹‘ø£¨¥´»Î≤Œ ˝Œ™shared secret£¨≈……˙√‹‘øª˘”⁄rootkey£¨≥§∂»πÃ∂®Œ™128bits
+ *
+ * @attention Œﬁ
+ * @param operation [IN/OUT]  ƒ£øÈæ‰±˙ #TEE_OperationHandle
+ * @param params [IN]  π≤œÌª˙√‹ ˝æ›÷∏’Î #TEE_Attribute
+ * @param paramCount [IN]  π≤œÌª˙√‹ ˝æ›∏ˆ ˝
+ * @param derivedKey [OUT] ≈……˙√‹‘øæ‰±˙ #TEE_ObjectHandle
+ *
+ * @retval Œﬁ
+ *
+ * @par “¿¿µ:
+ * @li crypto º”Ω‚√‹ƒ£øÈ
+ * @li tee_crypto_api.h º”Ω‚√‹APIÕ∑Œƒº˛
+ * @see Œﬁ
+ * @since V100R002C00B302
+*/
+void TEE_DeriveKey(TEE_OperationHandle operation, TEE_Attribute* params,
+            uint32_t paramCount, TEE_ObjectHandle derivedKey);
+/**
+ * @ingroup  crypto
+ * @brief …˙≥…ÀÊª˙ ˝
+ *
+ * @par √Ë ˆ:
+ * …˙≥…ÀÊª˙ ˝
+ *
+ * @attention Œﬁ
+ * @param randomBuffer [IN/OUT]  ÀÊª˙ ˝÷∏’Î
+ * @param randomBufferLen [IN]  ÀÊª˙ ˝≥§∂»
+ *
+ * @retval Œﬁ
+ *
+ * @par “¿¿µ:
+ * @li crypto º”Ω‚√‹ƒ£øÈ
+ * @li tee_crypto_api.h º”Ω‚√‹APIÕ∑Œƒº˛
+ * @see Œﬁ
+ * @since V100R002C00B302
+*/
+void TEE_GenerateRandom(void* randomBuffer, size_t randomBufferLen);
+/**
+ * @ingroup  crypto
+ * @brief »œ÷§º”Ω‚√‹≥ı ºªØ
+ *
+ * @par √Ë ˆ:
+ * »œ÷§º”Ω‚√‹≥ı ºªØ£¨÷ª÷ß≥÷AES-CCM
+ *
+ * @attention ≤ª÷ß≥÷AES-GCM
+ * @param operation [IN/OUT]  ƒ£øÈæ‰±˙ #TEE_OperationHandle
+ * @param nonce [IN]   ‰»ÎÀÊª˙ ˝ ˝æ›÷∏’Î
+ * @param nonceLen [IN]   ‰»ÎÀÊª˙ ˝ ˝æ›≥§∂» [7,8,9,10,11,12,13]
+ * @param tagLen [IN] ∞¥Œª±Ì æµƒ’™“™ ˝æ›≥§∂»[128, 112, 96, 64, 48, 32]
+ * @param AADLen [IN] ∏Ωº”»œ÷§ ˝æ›≥§∂»
+ * @param payloadLen [IN] º”Ω‚√‹ ˝æ›≥§∂»
+ *
+ * @retval #TEE_SUCCESS AE(Authenticated Encryption)≥ı ºªØ≥…π¶
+ * @retval #TEE_ERROR_GENERIC ”≤º˛º”Ω‚√‹µ◊≤„«˝∂Ø¥ÌŒÛ
+ *
+ * @par “¿¿µ:
+ * @li crypto º”Ω‚√‹ƒ£øÈ
+ * @li tee_crypto_api.h º”Ω‚√‹APIÕ∑Œƒº˛
+ * @see TEE_AEUpdateAAD | TEE_AEUpdate | TEE_AEEncryptFinal | TEE_AEDecryptFinal
+ * @since V100R002C00B302
+*/
+TEE_Result TEE_AEInit(TEE_OperationHandle operation,
+                void* nonce, size_t nonceLen, uint32_t tagLen,
+                uint32_t AADLen, uint32_t payloadLen);
+/**
+ * @ingroup  crypto
+ * @brief »œ÷§º”Ω‚√‹AAD‘ÀÀ„
+ *
+ * @par √Ë ˆ:
+ * »œ÷§º”Ω‚√‹AAD‘ÀÀ„£¨÷ª÷ß≥÷AES-CCM
+ *
+ * @attention ≤ª÷ß≥÷AES-GCM
+ * @param operation [IN/OUT]  ƒ£øÈæ‰±˙ #TEE_OperationHandle
+ * @param AADdata [IN]   ‰»Î∏Ωº”»œ÷§ ˝æ›÷∏’Î
+ * @param AADdataLen [IN]   ‰»Î∏Ωº”»œ÷§ ˝æ›≥§∂»
+ *
+ * @retval Œﬁ
+ *
+ * @par “¿¿µ:
+ * @li crypto º”Ω‚√‹ƒ£øÈ
+ * @li tee_crypto_api.h º”Ω‚√‹APIÕ∑Œƒº˛
+ * @see TEE_AEInit | TEE_AEUpdate | TEE_AEEncryptFinal | TEE_AEDecryptFinal
+ * @since V100R002C00B302
+*/
+void TEE_AEUpdateAAD(TEE_OperationHandle operation,
+                void* AADdata, size_t AADdataLen);
+/**
+ * ingroup  crypto
+ * @brief »œ÷§º”Ω‚√‹‘ÀÀ„
+ *
+ * @par √Ë ˆ:
+ * »œ÷§º”Ω‚√‹‘ÀÀ„£¨÷ª÷ß≥÷AES-CCM
+ *
+ * @attention ≤ª÷ß≥÷AES-GCM
+ * @param operation [IN/OUT]  ƒ£øÈæ‰±˙ #TEE_OperationHandle
+ * @param srcData [IN]   ‰»Îº”√‹/Ω‚√‹ ˝æ›÷∏’Î
+ * @param srcLen [IN]   ‰»Îº”√‹/Ω‚√‹ ˝æ›≥§∂»
+ * @param destData [OUT]  ‰≥ˆΩ‚√‹/º”√‹ ˝æ›÷∏’Î
+ * @param destLen [OUT]  ‰≥ˆΩ‚√‹/º”√‹ ˝æ›≥§∂»
+ *
+ * @retval #TEE_SUCCESS AE(Authenticated Encryption)º”Ω‚√‹‘ÀÀ„≥…π¶
+ * @retval #TEE_ERROR_GENERIC ”≤º˛º”Ω‚√‹µ◊≤„«˝∂Ø¥ÌŒÛ
+ *
+ * @par “¿¿µ:
+ * @li crypto º”Ω‚√‹ƒ£øÈ
+ * @li tee_crypto_api.h º”Ω‚√‹APIÕ∑Œƒº˛
+ * @see TEE_AEUpdateAAD | TEE_AEUpdateAAD | TEE_AEEncryptFinal | TEE_AEDecryptFinal
+ * @since V100R002C00B302
+*/
+TEE_Result TEE_AEUpdate(TEE_OperationHandle operation,void* srcData,
+            size_t srcLen,void* destData, size_t *destLen);
+/**
+ * @ingroup  crypto
+ * @brief »œ÷§º”√‹‘ÀÀ„Ω· ¯£¨≤¢º∆À„tag
+ *
+ * @par √Ë ˆ:
+ * »œ÷§º”√‹‘ÀÀ„Ω· ¯£¨≤¢º∆À„tag£¨÷ª÷ß≥÷AES-CCM
+ *
+ * @attention ≤ª÷ß≥÷AES-GCM
+ * @param operation [IN/OUT]  ƒ£øÈæ‰±˙ #TEE_OperationHandle
+ * @param srcData [IN]   ‰»Îº”√‹/Ω‚√‹ ˝æ›÷∏’Î
+ * @param srcLen [IN]   ‰»Îº”√‹/Ω‚√‹ ˝æ›≥§∂»
+ * @param destData [OUT]  ‰≥ˆΩ‚√‹/º”√‹ ˝æ›÷∏’Î
+ * @param destLen [OUT]  ‰≥ˆΩ‚√‹/º”√‹ ˝æ›≥§∂»
+ * @param tag [OUT] –£—È ˝æ›÷∏’Î
+ * @param tagLen [OUT] –£—È ˝æ›≥§∂»
+ *
+ * @retval #TEE_SUCCESS AE(Authenticated Encryption)º”√‹‘ÀÀ„Ω· ¯
+ * @retval #TEE_ERROR_GENERIC ”≤º˛º”Ω‚√‹µ◊≤„«˝∂Ø¥ÌŒÛ
+ *
+ * @par “¿¿µ:
+ * @li crypto º”Ω‚√‹ƒ£øÈ
+ * @li tee_crypto_api.h º”Ω‚√‹APIÕ∑Œƒº˛
+ * @see TEE_AEUpdateAAD | TEE_AEUpdateAAD | TEE_AEUpdate | TEE_AEDecryptFinal
+ * @since V100R002C00B302
+*/
+TEE_Result TEE_AEEncryptFinal(TEE_OperationHandle operation,
+            void* srcData, size_t srcLen,void* destData, size_t* destLen,
+                void* tag,size_t* tagLen);
+/**
+ * @ingroup  crypto
+ * @brief »œ÷§Ω‚√‹‘ÀÀ„Ω· ¯£¨≤¢º∆À„tag
+ *
+ * @par √Ë ˆ:
+ * »œ÷§Ω‚√‹‘ÀÀ„Ω· ¯£¨≤¢º∆À„tag£¨÷ª÷ß≥÷AES-CCM
+ *
+ * @attention ≤ª÷ß≥÷AES-GCM
+ * @param operation [IN/OUT]  ƒ£øÈæ‰±˙ #TEE_OperationHandle
+ * @param srcData [IN]   ‰»Îº”√‹/Ω‚√‹ ˝æ›÷∏’Î
+ * @param srcLen [IN]   ‰»Îº”√‹/Ω‚√‹ ˝æ›≥§∂»
+ * @param destData [OUT]  ‰≥ˆΩ‚√‹/º”√‹ ˝æ›÷∏’Î
+ * @param destLen [OUT]  ‰≥ˆΩ‚√‹/º”√‹ ˝æ›≥§∂»
+ * @param tag [IN] –£—È ˝æ›÷∏’Î
+ * @param tagLen [IN] –£—È ˝æ›≥§∂»
+ *
+ * @retval #TEE_SUCCESS AE(Authenticated Encryption)Ω‚√‹‘ÀÀ„Ω· ¯
+ * @retval #TEE_ERROR_MAC_INVALID –£—È∑µªÿ¥ÌŒÛ
+ *
+ * @par “¿¿µ:
+ * @li crypto º”Ω‚√‹ƒ£øÈ
+ * @li tee_crypto_api.h º”Ω‚√‹APIÕ∑Œƒº˛
+ * @see TEE_AEUpdateAAD | TEE_AEUpdateAAD | TEE_AEUpdate | TEE_AEEncryptFinal
+ * @since V100R002C00B302
+*/
+TEE_Result TEE_AEDecryptFinal(TEE_OperationHandle operation, void* srcData,
+                size_t srcLen, void* destData, size_t *destLen,
+                        void* tag, size_t tagLen);
+/**
+ * @ingroup  crypto
+ * @brief ∑«∂‘≥∆ ˝æ›º”√‹
+ *
+ * @par √Ë ˆ:
+ * ∑«∂‘≥∆ ˝æ›º”√‹£¨÷ª÷¥––“ª¥Œ°£
+ *
+ * @attention ∑«∂‘≥∆º”√‹÷ªƒ‹ π”√π´‘ø£¨ÀΩ‘øº”√‹ª·∑µªÿ¥ÌŒÛ
+ * @param operation [IN/OUT]  ƒ£øÈæ‰±˙ #TEE_OperationHandle
+ * @param params [IN] ≤Œ ˝÷∏’Î #TEE_Attribute
+ * @param paramCount [IN] ≤Œ ˝∏ˆ ˝
+ * @param srcData [IN]   ‰»Îº”√‹ ˝æ›÷∏’Î
+ * @param srcLen [IN]   ‰»Îº”√‹ ˝æ›≥§∂»
+ * @param destData [OUT]  ‰≥ˆΩ‚√‹ ˝æ›÷∏’Î
+ * @param destLen [OUT]  ‰≥ˆΩ‚√‹ ˝æ›≥§∂»
+ *
+ * @retval #TEE_SUCCESS ∑«∂‘≥∆º”√‹≥…π¶
+ * @retval #TEE_ERROR_GENERIC ”≤º˛º”Ω‚√‹µ◊≤„«˝∂Ø¥ÌŒÛ
+ * @retval #TEE_ERROR_BAD_PARAMETERS ≤Œ ˝Œ™NULL£¨ªÚ¥´»Î¥ÌŒÛ
+ * @retval #TEE_ERROR_NO_DATA π´‘øŒ™ø’£¨√ª”–…Ë÷√
+ *
+ * @par “¿¿µ:
+ * @li crypto º”Ω‚√‹ƒ£øÈ
+ * @li tee_crypto_api.h º”Ω‚√‹APIÕ∑Œƒº˛
+ * @see TEE_AsymmetricDecrypt
+ * @since V100R002C00B302
+*/
+TEE_Result TEE_AsymmetricEncrypt(TEE_OperationHandle operation,
+        TEE_Attribute* params, uint32_t paramCount, void* srcData,
+        size_t srcLen, void* destData, size_t *destLen);
+/**
+ * @ingroup  crypto
+ * @brief ∑«∂‘≥∆ ˝æ›Ω‚√‹
+ *
+ * @par √Ë ˆ:
+ * ∑«∂‘≥∆ ˝æ›Ω‚√‹£¨÷ª÷¥––“ª¥Œ°£
+ *
+ * @attention ∑«∂‘≥∆Ω‚√‹÷ªƒ‹ π”√ÀΩ‘ø£¨π´‘øΩ‚√‹ª·∑µªÿ¥ÌŒÛ
+ * @param operation [IN/OUT]  ƒ£øÈæ‰±˙ #TEE_OperationHandle
+ * @param params [IN] ≤Œ ˝÷∏’Î #TEE_Attribute
+ * @param paramCount [IN] ≤Œ ˝∏ˆ ˝
+ * @param srcData [IN]   ‰»ÎΩ‚√‹ ˝æ›÷∏’Î
+ * @param srcLen [IN]   ‰»ÎΩ‚√‹ ˝æ›≥§∂»
+ * @param destData [OUT]  ‰≥ˆº”√‹ ˝æ›÷∏’Î
+ * @param destLen [OUT]  ‰≥ˆº”√‹ ˝æ›≥§∂»
+ *
+ * @retval #TEE_SUCCESS ∑«∂‘≥∆º”√‹≥…π¶
+ * @retval #TEE_ERROR_GENERIC ”≤º˛º”Ω‚√‹µ◊≤„«˝∂Ø¥ÌŒÛ
+ * @retval #TEE_ERROR_BAD_PARAMETERS ≤Œ ˝Œ™NULL£¨ªÚ¥´»Î¥ÌŒÛ
+ * @retval #TEE_ERROR_NO_DATA ÀΩ‘øŒ™ø’£¨√ª”–…Ë÷√
+ *
+ * @par “¿¿µ:
+ * @li crypto º”Ω‚√‹ƒ£øÈ
+ * @li tee_crypto_api.h º”Ω‚√‹APIÕ∑Œƒº˛
+ * @see TEE_AsymmetricEncrypt
+ * @since V100R002C00B302
+*/
+TEE_Result TEE_AsymmetricDecrypt(TEE_OperationHandle operation,
+        TEE_Attribute* params, uint32_t paramCount, void* srcData,
+            size_t srcLen, void* destData, size_t *destLen);
+/**
+ * @ingroup  crypto
+ * @brief ∑«∂‘≥∆ ˝æ›«©√˚’™“™
+ *
+ * @par √Ë ˆ:
+ * ∑«∂‘≥∆ ˝æ›«©√˚’™“™
+ *
+ * @attention ÷ªƒ‹ π”√ÀΩ‘øΩ¯––«©√˚£¨π´‘ø«©√˚∑µªÿ¥ÌŒÛ
+ * @param operation [IN/OUT]  ƒ£øÈæ‰±˙ #TEE_OperationHandle
+ * @param params [IN] ≤Œ ˝÷∏’Î #TEE_Attribute
+ * @param paramCount [IN] ≤Œ ˝∏ˆ ˝
+ * @param digest [IN]  ’™“™ ˝æ›÷∏’Î
+ * @param digestLen [IN]  ’™“™ ˝æ›≥§∂»
+ * @param signature [OUT] «©√˚ ˝æ›÷∏’Î
+ * @param signatureLen [OUT] «©√˚ ˝æ›≥§∂»
+ *
+ * @retval #TEE_SUCCESS ∑«∂‘≥∆«©√˚≥…π¶
+ * @retval #TEE_ERROR_GENERIC ”≤º˛º”Ω‚√‹µ◊≤„«˝∂Ø¥ÌŒÛ
+ * @retval #TEE_ERROR_BAD_PARAMETERS ≤Œ ˝Œ™NULL£¨ªÚ¥´»Î¥ÌŒÛ
+ * @retval #TEE_ERROR_NO_DATA ÀΩ‘øŒ™ø’£¨√ª”–…Ë÷√
+ *
+ * @par “¿¿µ:
+ * @li crypto º”Ω‚√‹ƒ£øÈ
+ * @li tee_crypto_api.h º”Ω‚√‹APIÕ∑Œƒº˛
+ * @see TEE_AsymmetricVerifyDigest
+ * @since V100R002C00B302
+*/
+TEE_Result TEE_AsymmetricSignDigest(TEE_OperationHandle operation,
+        TEE_Attribute* params, uint32_t paramCount, void* digest,
+        size_t digestLen, void* signature, size_t *signatureLen);
+/**
+ * @ingroup  crypto
+ * @brief ∑«∂‘≥∆ ˝æ›—È÷§’™“™
+ *
+ * @par √Ë ˆ:
+ * ∑«∂‘≥∆ ˝æ›—È÷§’™“™
+ *
+ * @attention ÷ªƒ‹ π”√π´‘øΩ¯––—È÷§£¨ÀΩ‘ø—È÷§∑µªÿ¥ÌŒÛ
+ * @param operation [IN/OUT]  ƒ£øÈæ‰±˙ #TEE_OperationHandle
+ * @param params [IN] ≤Œ ˝÷∏’Î #TEE_Attribute
+ * @param paramCount [IN] ≤Œ ˝∏ˆ ˝
+ * @param digest [IN]  ’™“™ ˝æ›÷∏’Î
+ * @param digestLen [IN]  ’™“™ ˝æ›≥§∂»
+ * @param signature [IN] «©√˚ ˝æ›÷∏’Î
+ * @param signatureLen [IN] «©√˚ ˝æ›≥§∂»
+ *
+ * @retval #TEE_SUCCESS ∑«∂‘≥∆—È÷§≥…π¶
+ * @retval #TEE_ERROR_GENERIC µ˜”√”≤º˛«˝∂Ø∑µªÿ¥ÌŒÛ
+ * @retval #TEE_ERROR_BAD_PARAMETERS ≤Œ ˝Œ™NULL£¨ªÚ¥´»Î¥ÌŒÛ
+ * @retval #TEE_ERROR_NO_DATA π´‘øŒ™ø’£¨√ª”–…Ë÷√
+ *
+ * @par “¿¿µ:
+ * @li crypto º”Ω‚√‹ƒ£øÈ
+ * @li tee_crypto_api.h º”Ω‚√‹APIÕ∑Œƒº˛
+ * @see TEE_AsymmetricSignDigest
+ * @since V100R002C00B302
+*/
+TEE_Result TEE_AsymmetricVerifyDigest(TEE_OperationHandle operation,
+        TEE_Attribute* params, uint32_t paramCount, void* digest,
+        size_t digestLen, void* signature, size_t signatureLen);
+#endif
+
+

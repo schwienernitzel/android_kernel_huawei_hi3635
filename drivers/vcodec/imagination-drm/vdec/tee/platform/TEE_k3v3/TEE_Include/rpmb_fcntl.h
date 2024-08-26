@@ -1,0 +1,242 @@
+ï»¿/*!
+ *****************************************************************************
+ *
+ * @File       rpmb_fcntl.h
+ * ---------------------------------------------------------------------------
+ *
+ * Copyright (c) Imagination Technologies Ltd.
+ * 
+ * The contents of this file are subject to the MIT license as set out below.
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a 
+ * copy of this software and associated documentation files (the "Software"), 
+ * to deal in the Software without restriction, including without limitation 
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+ * and/or sell copies of the Software, and to permit persons to whom the 
+ * Software is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in 
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
+ * THE SOFTWARE.
+ * 
+ * Alternatively, the contents of this file may be used under the terms of the 
+ * GNU General Public License Version 2 ("GPL")in which case the provisions of
+ * GPL are applicable instead of those above. 
+ * 
+ * If you wish to allow use of your version of this file only under the terms 
+ * of GPL, and not to allow others to use your version of this file under the 
+ * terms of the MIT license, indicate your decision by deleting the provisions 
+ * above and replace them with the notice and other provisions required by GPL 
+ * as set out in the file called "GPLHEADER" included in this distribution. If 
+ * you do not delete the provisions above, a recipient may use your version of 
+ * this file under the terms of either the MIT license or GPL.
+ * 
+ * This License is also included in this distribution in the file called 
+ * "MIT_COPYING".
+ *
+ *****************************************************************************/
+
+#ifndef _RPMB_FCNTL_H
+#define _RPMB_FCNTL_H
+
+/**
+ * @ingroup  TEE_RPMB_API
+ * @brief RPMB°²È«´æ´¢³õÊ¼»¯
+ *
+ * @par ÃèÊö:
+ * ·ÖÇø³õÊ¼»¯£¬Ö´ĞĞĞ´RPMB KeyºÍ¸ñÊ½»¯²Ù×÷
+ *
+ * @attention ¸Ãº¯ÊıÖ»ĞèÖ´ĞĞÒ»´Î
+ * @param ÎŞ
+ *
+ * @retval #TEE_SUCCESS ±íÊ¾¸Ãº¯ÊıÖ´ĞĞ³É¹¦
+ * @retval #TEE_ERROR_RPMB_GENERIC RPMB¿ØÖÆÆ÷Í¨ÓÃ´íÎó
+ * @retval #TEE_ERROR_RPMB_MAC_FAIL RPMB¿ØÖÆÆ÷MACĞ£Ñé´íÎó
+ * @retval #TEE_ERROR_RPMB_RESP_UNEXPECT_MAC RPMBÓ¦´ğÊı¾İµÄMACĞ£Ñé´íÎó
+ *
+ * @par ÒÀÀµ:
+ * @li rpmb_fcntl.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼ş¡£
+ * @since TrustedCore V100R005C00
+*/
+TEE_Result TEE_RPMB_FS_Init(void);
+
+/**
+ * @ingroup  TEE_RPMB_API
+ * @brief RPMB°²È«´æ´¢¸ñÊ½»¯
+ *
+ * @par ÃèÊö:
+ * RPMB°²È«´æ´¢¸ñÊ½»¯²Ù×÷
+ *
+ * @attention ÎŞ
+ * @param ÎŞ
+ *
+ * @retval #TEE_SUCCESS ±íÊ¾¸Ãº¯ÊıÖ´ĞĞ³É¹¦
+ * @retval #TEE_ERROR_RPMB_GENERIC RPMB¿ØÖÆÆ÷Í¨ÓÃ´íÎó
+ * @retval #TEE_ERROR_RPMB_MAC_FAIL RPMB¿ØÖÆÆ÷MACĞ£Ñé´íÎó
+ * @retval #TEE_ERROR_RPMB_RESP_UNEXPECT_MAC RPMBÓ¦´ğÊı¾İµÄMACĞ£Ñé´íÎó
+ *
+ * @par ÒÀÀµ:
+ * @li rpmb_fcntl.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼ş¡£
+ * @since TrustedCore V100R005C00
+*/
+TEE_Result TEE_RPMB_FS_Format(void);
+
+/**
+ * @ingroup  TEE_RPMB_API
+ * @brief RPMB°²È«´æ´¢´æ´¢ÎÄ¼ş
+ *
+ * @par ÃèÊö:
+ * RPMB°²È«´æ´¢´æ´¢ÎÄ¼ş
+ *
+ * @attention ÎŞ
+ * @param filename [IN]  Ğ´ÈëÊı¾İµÄÎÄ¼şÃû
+ * @param buf [IN]  Ğ´ÈëÊı¾İµÄ»º³åÇø
+ * @param size [IN]  Ğ´ÈëÊı¾İµÄ´óĞ¡
+ *
+ * @retval #TEE_SUCCESS ±íÊ¾¸Ãº¯ÊıÖ´ĞĞ³É¹¦
+ * @retval #TEE_ERROR_BAD_PARAMETERS ÊäÈë²ÎÊıÓĞÎó£¬»òÎÄ¼şÃû³¤¶È³¬¹ı96×Ö½Ú
+ * @retval #TEE_ERROR_RPMB_NOSPC RPMB·ÖÇø´ÅÅÌ¿Õ¼ä²»×ã
+ *
+ * @par ÒÀÀµ:
+ * @li rpmb_fcntl.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼ş¡£
+ * @since TrustedCore V100R005C00
+*/
+TEE_Result TEE_RPMB_FS_Write(const char *filename, uint8_t *buf, size_t size);
+
+/**
+ * @ingroup  TEE_RPMB_API
+ * @brief RPMB°²È«´æ´¢¶ÁÈ¡ÎÄ¼ş
+ *
+ * @par ÃèÊö:
+ * RPMB°²È«´æ´¢¶ÁÈ¡ÎÄ¼ş
+ *
+ * @attention ÎŞ
+ * @param filename [IN]  ¶ÁÈ¡Êı¾İµÄÎÄ¼şÃû
+ * @param buf [IN]  ¶ÁÈ¡Êı¾İµÄ»º³åÇø
+ * @param size [IN]  ¶ÁÈ¡Êı¾İµÄ´óĞ¡
+ * @param count [OUT]  Êµ¼Ê¶ÁÈ¡Êı¾İµÄ´óĞ¡
+ *
+ * @retval #TEE_SUCCESS ±íÊ¾¸Ãº¯ÊıÖ´ĞĞ³É¹¦
+ * @retval #TEE_ERROR_BAD_PARAMETERS ÊäÈë²ÎÊıÓĞÎó£¬»òÎÄ¼şÃû³¤¶È³¬¹ı96×Ö½Ú
+ * @retval #TEE_ERROR_RPMB_FILE_NOT_FOUND ÎÄ¼ş²»´æÔÚ
+ *
+ * @par ÒÀÀµ:
+ * @li rpmb_fcntl.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼ş¡£
+ * @since TrustedCore V100R005C00
+*/
+TEE_Result TEE_RPMB_FS_Read(const char *filename, uint8_t *buf, size_t size, uint32_t *count);
+
+/**
+ * @ingroup  TEE_RPMB_API
+ * @brief RPMB°²È«´æ´¢ÖØÃüÃûÎÄ¼ş
+ *
+ * @par ÃèÊö:
+ * RPMB°²È«´æ´¢ÖØÃüÃûÎÄ¼ş
+ *
+ * @attention ÎŞ
+ * @param old_name [IN]  ¾ÉÎÄ¼şÃû
+ * @param new_name [IN]  ĞÂÎÄ¼şÃû
+ *
+ * @retval #TEE_SUCCESS ±íÊ¾¸Ãº¯ÊıÖ´ĞĞ³É¹¦
+ * @retval #TEE_ERROR_BAD_PARAMETERS ÊäÈë²ÎÊıÓĞÎó£¬»òÎÄ¼şÃû³¤¶È³¬¹ı96×Ö½Ú
+ * @retval #TEE_ERROR_RPMB_FILE_NOT_FOUND ¾ÉÎÄ¼ş²»´æÔÚ
+ *
+ * @par ÒÀÀµ:
+ * @li rpmb_fcntl.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼ş¡£
+ * @since TrustedCore V100R005C00
+*/
+TEE_Result TEE_RPMB_FS_Rename(const char *old_name, const char *new_name);
+
+/**
+ * @ingroup  TEE_RPMB_API
+ * @brief RPMB°²È«´æ´¢É¾³ıÎÄ¼ş
+ *
+ * @par ÃèÊö:
+ * RPMB°²È«´æ´¢É¾³ıÎÄ¼ş
+ *
+ * @attention ÎŞ
+ * @param filename [IN]  ´ıÉ¾³ıµÄÎÄ¼şÃû
+ *
+ * @retval #TEE_SUCCESS ±íÊ¾¸Ãº¯ÊıÖ´ĞĞ³É¹¦
+ * @retval #TEE_ERROR_BAD_PARAMETERS ÊäÈë²ÎÊıÓĞÎó£¬»òÎÄ¼şÃû³¤¶È³¬¹ı96×Ö½Ú
+ * @retval #TEE_ERROR_RPMB_FILE_NOT_FOUND ÎÄ¼ş²»´æÔÚ
+ *
+ * @par ÒÀÀµ:
+ * @li rpmb_fcntl.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼ş¡£
+ * @since TrustedCore V100R005C00
+*/
+TEE_Result TEE_RPMB_FS_Rm(const char *filename);
+
+/**
+ * @ingroup  TEE_RPMB_API
+ *
+ * ´æ´¢ÓÚRPMB·ÖÇøµÄÎÄ¼ş×´Ì¬£¬ÓÃÓÚ#TEE_RPMB_FS_Statº¯Êı \n
+*/
+struct rpmb_fs_stat {
+    uint32_t size;    /**< ÎÄ¼ş´óĞ¡  */
+    uint32_t reserved;    /**< Ô¤Áô  */
+};
+/**
+ * @ingroup  TEE_RPMB_API
+ * @brief RPMB°²È«´æ´¢»ñÈ¡ÎÄ¼ş×´Ì¬
+ *
+ * @par ÃèÊö:
+ * RPMB°²È«´æ´¢»ñÈ¡ÎÄ¼ş×´Ì¬
+ *
+ * @attention ÎŞ
+ * @param filename [IN]  ÎÄ¼şÃû
+ * @param stat [OUT]  »ñÈ¡µÄÎÄ¼ş×´Ì¬ĞÅÏ¢
+ *
+ * @retval #TEE_SUCCESS ±íÊ¾¸Ãº¯ÊıÖ´ĞĞ³É¹¦
+ * @retval #TEE_ERROR_BAD_PARAMETERS ÊäÈë²ÎÊıÓĞÎó£¬»òÎÄ¼şÃû³¤¶È³¬¹ı96×Ö½Ú
+ * @retval #TEE_ERROR_RPMB_FILE_NOT_FOUND ÎÄ¼ş²»´æÔÚ
+ *
+ * @par ÒÀÀµ:
+ * @li rpmb_fcntl.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼ş¡£
+ * @since TrustedCore V100R005C00
+*/
+TEE_Result TEE_RPMB_FS_Stat(const char *filename, struct rpmb_fs_stat *stat);
+
+/**
+ * @ingroup  TEE_RPMB_API
+ *
+ * RPMB KeyµÄ×´Ì¬£¬ÓÃÓÚ#TEE_RPMB_KEY_Statusº¯Êı \n
+*/
+enum TEE_RPMB_KEY_STAT {
+    TEE_RPMB_KEY_INVALID = 0x0,
+    TEE_RPMB_KEY_SUCCESS = 0x1,    /**< RPMB KeyÒÑĞ´ÈëÇÒÆ¥ÅäÕıÈ·  */
+    TEE_RPMB_KEY_NOT_PROGRAM,    /**< RPMB KeyÎ´Ğ´Èë  */
+    TEE_RPMB_KEY_NOT_MATCH,        /**< RPMB KeyÒÑĞ´Èëµ«Æ¥ÅäÊ§°Ü  */
+};
+/**
+ * @ingroup  TEE_RPMB_API
+ * @brief RPMB°²È«´æ´¢»ñÈ¡RPMB Key×´Ì¬
+ *
+ * @par ÃèÊö:
+ * RPMB°²È«´æ´¢»ñÈ¡RPMB Key×´Ì¬
+ *
+ * @attention ÎŞ
+ * @param ÎŞ
+ *
+ * @retval #TEE_RPMB_KEY_SUCCESS RPMB KeyÒÑĞ´ÈëÇÒÆ¥ÅäÕıÈ·
+ * @retval #TEE_RPMB_KEY_NOT_PROGRAM RPMB KeyÎ´Ğ´Èë
+ * @retval #TEE_RPMB_KEY_NOT_MATCH RPMB KeyÒÑĞ´Èëµ«Æ¥ÅäÊ§°Ü
+ * @retval #TEE_RPMB_KEY_INVALID RPMB Key×´Ì¬ÎŞĞ§
+ *
+ * @par ÒÀÀµ:
+ * @li rpmb_fcntl.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼ş¡£
+ * @since TrustedCore V100R005C00
+*/
+uint32_t TEE_RPMB_KEY_Status(void);
+
+#endif //_RPMB_FCNTL_H
+
+
+

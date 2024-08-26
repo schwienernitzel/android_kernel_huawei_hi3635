@@ -1,0 +1,406 @@
+ï»¿/*!
+ *****************************************************************************
+ *
+ * @File       tee_internal_api.h
+ * ---------------------------------------------------------------------------
+ *
+ * Copyright (c) Imagination Technologies Ltd.
+ * 
+ * The contents of this file are subject to the MIT license as set out below.
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a 
+ * copy of this software and associated documentation files (the "Software"), 
+ * to deal in the Software without restriction, including without limitation 
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+ * and/or sell copies of the Software, and to permit persons to whom the 
+ * Software is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in 
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
+ * THE SOFTWARE.
+ * 
+ * Alternatively, the contents of this file may be used under the terms of the 
+ * GNU General Public License Version 2 ("GPL")in which case the provisions of
+ * GPL are applicable instead of those above. 
+ * 
+ * If you wish to allow use of your version of this file only under the terms 
+ * of GPL, and not to allow others to use your version of this file under the 
+ * terms of the MIT license, indicate your decision by deleting the provisions 
+ * above and replace them with the notice and other provisions required by GPL 
+ * as set out in the file called "GPLHEADER" included in this distribution. If 
+ * you do not delete the provisions above, a recipient may use your version of 
+ * this file under the terms of either the MIT license or GPL.
+ * 
+ * This License is also included in this distribution in the file called 
+ * "MIT_COPYING".
+ *
+ *****************************************************************************/
+
+#ifndef __TEE_INTERNAL_API_H
+#define __TEE_INTERNAL_API_H
+
+/**
+ * @ingroup TEE_CommonDef
+ * ÎÞ·ûºÅÕûÐÍ¶¨Òå
+ */
+typedef unsigned long     uint32_t;
+
+/**
+ * @ingroup TEE_CommonDef
+ * ÓÐ·ûºÅÕûÐÍ¶¨Òå
+ */
+typedef signed long       int32_t;
+/**
+ * @ingroup TEE_CommonDef
+ * ÎÞ·ûºÅ¶ÌÕûÐÍ¶¨Òå
+ */
+typedef unsigned short    uint16_t;
+/**
+ * @ingroup TEE_CommonDef
+ * ÓÐ·ûºÅ¶ÌÕûÐÍ¶¨Òå
+ */
+typedef signed short      int16_t;
+/**
+ * @ingroup TEE_CommonDef
+ * ÎÞ·ûºÅ×Ö·ûÐÍ¶¨Òå
+ */
+typedef unsigned char     uint8_t;
+/**
+ * @ingroup TEE_CommonDef
+ * ÓÐ·ûºÅ×Ö·ûÐÍ¶¨Òå
+ */
+typedef signed char       int8_t;
+
+#ifndef bool
+/**
+ * @ingroup TEE_CommonDef
+ * ²¼¶ûÐÍ¶¨Òå
+ */
+#define bool    signed char
+#endif
+/**
+ * @ingroup TEE_CommonDef
+ * Êý¾Ý³¤¶ÈÀàÐÍ¶¨Òå
+ */
+typedef unsigned int    size_t;
+
+/**
+ * @ingroup TEE_CommonDef
+ * trueµÄÖµ¶¨Òå
+ */
+#undef true
+#define true    1
+
+/**
+ * @ingroup TEE_CommonDef
+ * falseµÄÖµ¶¨Òå
+ */
+#undef false
+#define false   0
+
+/**
+ * @ingroup TEE_CommonDef
+ * NULLµÄÖµ¶¨Òå
+ */
+#ifndef NULL
+#define  NULL   ((void*) 0)
+#endif
+
+#define PARAM_NOT_USED(val) ((void)val)
+
+/**
+ * @ingroup  TEE_CommonDef
+ * TEE²ÎÊýÁªºÏÌå½á¹¹¶¨Òå
+ *
+ * µ±²ÎÊýÊÇ»º³åÇøÀàÐÍÊ±£¬ÁªºÏÌåµÄÄÚÈÝÖ¸Ïòmemref\n
+ * µ±²ÎÊýÊÇÊý¾ÝÀàÐÍÊ±£¬ÁªºÏÌåµÄÄÚÈÝÖ¸Ïòvalue
+ */
+typedef union {
+    struct
+    {
+        void* buffer;       /**< »º³åÇøÖ¸Õë  */
+        unsigned int size;  /**< »º³åÇø´óÐ¡  */
+    } memref;
+    struct
+    {
+        unsigned int a;     /**< ÕûÐÎÊý¾Ýa  */
+        unsigned int b;     /**< ÕûÐÎÊý¾Ýb  */
+    } value;
+} TEE_Param;
+
+/**
+ * @ingroup TEE_CommonDef
+ * ÓÃÓÚ¼ÆËã·Ç°²È«ÊÀ½çÓë°²È«ÊÀ½ç´«µÝ²ÎÊýµÄÊýÖµ
+ */
+#define TEE_PARAM_TYPES( param0Type, param1Type, param2Type, param3Type) \
+    ((param3Type) << 12 | (param2Type) << 8 | (param1Type) << 4 | (param0Type))
+
+/**
+ * @ingroup TEE_CommonDef
+ * ÓÃÓÚ¼ÆËãparamTypesÖÐ×Ö¶ÎindexµÄÊýÖµ
+ */
+#define TEE_PARAM_TYPE_GET( paramTypes, index) \
+    (((paramTypes) >> (4*(index))) & 0x0F)
+
+/**
+ * @ingroup  TEE_CommonDef
+ *
+ * ²ÎÊýÀàÐÍ¶¨Òå\n
+ */
+enum TEE_ParamType {
+    TEE_PARAM_TYPE_NONE = 0x0,
+    TEE_PARAM_TYPE_VALUE_INPUT = 0x1,
+    TEE_PARAM_TYPE_VALUE_OUTPUT = 0x2,
+    TEE_PARAM_TYPE_VALUE_INOUT = 0x3,
+    TEE_PARAM_TYPE_MEMREF_INPUT = 0x5,
+    TEE_PARAM_TYPE_MEMREF_OUTPUT = 0x6,
+    TEE_PARAM_TYPE_MEMREF_INOUT = 0x7,
+};
+
+#define S_VAR_NOT_USED(variable)  do{(void)(variable);}while(0);
+
+/**
+* @ingroup  TEE_CommonDef
+*
+* TEE¶ÔÏó½á¹¹Ìå¶¨Òå
+*/
+typedef struct {
+	uint32_t objectType;        /**< ¶ÔÏóÀàÐÍ  */
+	uint32_t objectSize;        /**< ¶ÔÏóÊý¾Ý³¤¶È  */
+	uint32_t maxObjectSize;     /**< ¶ÔÏóÔÊÐíµÄ×î´ó³¤¶È */
+	uint32_t objectUsage;       /**< ¶ÔÏóÊ¹ÓÃ·¶Î§ */
+	uint32_t dataSize;          /**< ¶ÔÏóµÄÊý¾Ý³¤¶È */
+	uint32_t dataPosition;      /**< ¶ÔÏóµÄÊý¾ÝÎ»ÖÃ */
+	uint32_t handleFlags;       /**< ¶ÔÏóÊý¾Ý·ÃÎÊ·½Ê½ */
+} TEE_ObjectInfo;
+
+/**
+* @ingroup  TEE_CommonDef
+*
+* TEEÊôÐÔ½á¹¹Ìå¶¨Òå
+*/
+typedef struct {
+    uint32_t attributeID;           /**<Attribute ID  */
+    union {
+        struct {
+            void* buffer;           /**< »º³åÇøÖ¸Õë  */
+            size_t length;          /**< »º³åÇø³¤¶È  */
+        } ref;
+        struct {
+            uint32_t a;             /**< ÕûÐÎÊý¾Ýa  */
+            uint32_t b;             /**< ÕûÐÎÊý¾Ýb  */
+        } value;
+    } content;
+} TEE_Attribute;
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ *
+ * object attribute µÄÀàÐÍ\n
+*/
+enum TEE_ObjectAttribute{
+    TEE_ATTR_SECRET_VALUE = 0xC0000000,                   /**< attributeÎªSECRET_VALUE */
+    TEE_ATTR_RSA_MODULUS = 0xD0000130,                    /**< attributeÎªRSA_MODULUS */
+    TEE_ATTR_RSA_PUBLIC_EXPONENT = 0xD0000230,            /**< attributeÎªRSA_PUBLIC_EXPONENT */
+    TEE_ATTR_RSA_PRIVATE_EXPONENT = 0xC0000330,           /**< attributeÎªRSA_PRIVATE_EXPONENT */
+    TEE_ATTR_RSA_PRIME1 = 0xC0000430,                     /**< attributeÎªRSA_PRIME1 */
+    TEE_ATTR_RSA_PRIME2 = 0xC0000530,                     /**< attributeÎªRSA_PRIME2 */
+    TEE_ATTR_RSA_EXPONENT1 = 0xC0000630,                  /**< attributeÎªRSA_EXPONENT1 */
+    TEE_ATTR_RSA_EXPONENT2 = 0xC0000730,                  /**< attributeÎªRSA_EXPONENT2 */
+    TEE_ATTR_RSA_COEFFICIENT  = 0xC0000830,               /**< attributeÎªRSA_COEFFICIENT */
+    TEE_ATTR_DSA_PRIME = 0xD0001031,                      /**< attributeÎªDSA_PRIME */
+    TEE_ATTR_DSA_SUBPRIME = 0xD0001131,                   /**< attributeÎªDSA_SUBPRIME */
+    TEE_ATTR_DSA_BASE = 0xD0001231,                       /**< attributeÎªDSA_BASE */
+    TEE_ATTR_DSA_PUBLIC_VALUE = 0xD0000131,               /**< attributeÎªDSA_PUBLIC_VALUE */
+    TEE_ATTR_DSA_PRIVATE_VALUE = 0xC0000231,              /**< attributeÎªDSA_PRIVATE_VALUE */
+    TEE_ATTR_DH_PRIME = 0xD0001032,                       /**< attributeÎªDH_PRIME */
+    TEE_ATTR_DH_SUBPRIME = 0xD0001132,                    /**< attributeÎªDH_SUBPRIME */
+    TEE_ATTR_DH_BASE = 0xD0001232,                        /**< attributeÎªDH_BASE */
+    TEE_ATTR_DH_X_BITS = 0xF0001332,                      /**< attributeÎªDH_X_BITS */
+    TEE_ATTR_DH_PUBLIC_VALUE = 0xD0000132,                /**< attributeÎªDH_PUBLIC_VALUE */
+    TEE_ATTR_DH_PRIVATE_VALUE = 0xC0000232,               /**< attributeÎªDH_PRIVATE_VALUE */
+    TEE_ATTR_RSA_OAEP_LABEL = 0xD0000930,                 /**< attributeÎªRSA_OAEP_LABEL*/
+    TEE_ATTR_RSA_PSS_SALT_LENGTH = 0xF0000A30             /**< attributeÎªRSA_OAEP_LABEL */
+};
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ *
+ * objectµÄÀàÐÍ£¬±íÃ÷¸Ãobject ÖÐµÄkey ÊÇÊ²Ã´ÀàÐÍ \n
+*/
+enum TEE_ObjectType{
+    TEE_TYPE_AES = 0xA0000010,                    /**< objectÖÐµÄkeyÎªAESÀàÐÍ */
+    TEE_TYPE_DES = 0xA0000011,                    /**< objectÖÐµÄkeyÎªDESÀàÐÍ */
+    TEE_TYPE_DES3 = 0xA0000013,                   /**< objectÖÐµÄkeyÎªDES3ÀàÐÍ */
+    TEE_TYPE_HMAC_MD5 = 0xA0000001,               /**< objectÖÐµÄkeyÎªHMAC_MD5ÀàÐÍ */
+    TEE_TYPE_HMAC_SHA1 = 0xA0000002,              /**< objectÖÐµÄkeyÎªHMAC_SHA1ÀàÐÍ */
+    TEE_TYPE_HMAC_SHA224 = 0xA0000003,            /**< objectÖÐµÄkeyÎªHMAC_SHA224ÀàÐÍ */
+    TEE_TYPE_HMAC_SHA256 = 0xA0000004,            /**< objectÖÐµÄkeyÎªHMAC_SHA256ÀàÐÍ */
+    TEE_TYPE_HMAC_SHA384 = 0xA0000005,            /**< objectÖÐµÄkeyÎªHMAC_SHA384ÀàÐÍ */
+    TEE_TYPE_HMAC_SHA512 = 0xA0000006,            /**< objectÖÐµÄkeyÎªHMAC_SHA512ÀàÐÍ */
+    TEE_TYPE_RSA_PUBLIC_KEY = 0xA0000030,         /**< objectÖÐµÄkeyÎªRSA_PUBLIC_KEYÀàÐÍ */
+    TEE_TYPE_RSA_KEYPAIR = 0xA1000030,            /**< objectÖÐµÄkeyÎªRSA_KEYPAIRÀàÐÍ */
+    TEE_TYPE_DSA_PUBLIC_KEY = 0xA0000031,         /**< objectÖÐµÄkeyÎªDSA_PUBLIC_KEYÀàÐÍ */
+    TEE_TYPE_DSA_KEYPAIR = 0xA1000031,            /**< objectÖÐµÄkeyÎªDSA_KEYPAIRÀàÐÍ */
+    TEE_TYPE_DH_KEYPAIR = 0xA1000032,             /**< objectÖÐµÄkeyÎªDH_KEYPAIRÀàÐÍ */
+    TEE_TYPE_GENERIC_SECRET = 0xA0000000,         /**< objectÖÐµÄkeyÎªGENERIC_SECRETÀàÐÍ */
+    TEE_TYPE_DATA = 0xA1000033,                   /**< objectÃ»ÓÐkey£¬Îª´¿Êý¾ÝÀàÐÍ */
+};
+
+/**
+* @ingroup  TEE_CommonDef
+*
+* TEE¶ÔÏó¾ä±ú½á¹¹Ìå¶¨Òå
+*/
+struct __TEE_ObjectHandle {
+	void* dataPtr;                  /**< ¶ÔÏóµÄÊý¾Ý¶ÔÏó²Ù×÷Ö¸Õë  */
+	uint32_t dataLen;               /**< ¶ÔÏóµÄÊý¾Ý¶ÔÏóÃû³Æ³¤¶È  */
+	uint8_t dataName[255];          /**< ¶ÔÏóµÄÊý¾Ý¶ÔÏóÃû³Æ  */
+	TEE_ObjectInfo *ObjectInfo;     /**< ¶ÔÏóµÄÐÅÏ¢Êý¾ÝÖ¸Õë  */
+	TEE_Attribute *Attribute;       /**< ¶ÔÏóµÄÊôÐÔÖ¸Õë  */
+	uint32_t attributesLen;         /**< ¶ÔÏóµÄÊôÐÔ³¤¶È  */
+	uint32_t CRTMode;               /**< ¶ÔÏóµÄCRTÄ£Ê½  */
+    void* infoattrfd;               /**< Î´Ê¹ÓÃ  */
+};
+typedef struct __TEE_ObjectHandle *TEE_ObjectHandle;
+
+typedef struct {
+    uint32_t timeLow;
+    uint16_t timeMid;
+    uint16_t timeHiAndVersion;
+    uint8_t clockSeqAndNode[8];
+}TEE_UUID;
+//typedef uint32_t        TEE_UUID;
+
+/**
+* @ingroup  TEE_CommonDef
+*
+* º¯Êý·µ»ØµÄ´íÎóÂë
+*/
+enum TEE_Result_Value{
+    TEE_SUCCESS = 0x0,                          /**< ³É¹¦  */
+    TEE_ERROR_INVALID_CMD,                      /**< ·Ç·¨ÃüÁî */
+    TEE_ERROR_SERVICE_NOT_EXIST,                /**< ·þÎñ²»´æÔÚ */
+    TEE_ERROR_SESSION_NOT_EXIST,                /**< Á¬½Ó²»´æÔÚ */
+    TEE_ERROR_SESSION_MAXIMUM,                  /**< Á¬½ÓÊýÒÑÂú */
+    TEE_ERROR_REGISTER_EXIST_SERVICE,           /**< ×¢²áÒÑ¾­´æÔÚµÄ·þÎñ */
+    TEE_ERROR_TARGET_DEAD_FATAL,                 /**< Global Task ±ÀÀ£  */
+    TEE_ERROR_READ_DATA,                        /**< ¶ÁÈ¡ÎÄ¼þ´íÎó  */
+    TEE_ERROR_WRITE_DATA,                       /**< Ð´ÈëÎÄ¼þ´íÎó  */
+    TEE_ERROR_TRUNCATE_OBJECT,                  /**< ½Ø¶ÏÎÄ¼þ´íÎó  */
+    TEE_ERROR_SEEK_DATA,                        /**< ²éÕÒÎÄ¼þ´íÎó  */
+    TEE_ERROR_SYNC_DATA,                        /**< Í¬²½ÎÄ¼þ´íÎó  */
+    TEE_ERROR_RENAME_OBJECT,                    /**< ÖØÃüÃûÎÄ¼þ´íÎó  */
+    TEE_ERROR_TRUSTED_APP_LOAD_ERROR,           /**< ´ò¿ª»á»°Ê±£¬¼ÓÔØ¿ÉÐÅÓ¦ÓÃ³ÌÐòÊ§°Ü*/
+    TEE_ERROR_GENERIC = 0xFFFF0000,             /**< Í¨ÓÃ´íÎó  */
+    TEE_ERROR_ACCESS_DENIED = 0xFFFF0001 ,      /**< È¨ÏÞÐ£ÑéÊ§°Ü  */
+    TEE_ERROR_CANCEL = 0xFFFF0002 ,             /**< ²Ù×÷ÒÑÈ¡Ïû  */
+    TEE_ERROR_ACCESS_CONFLICT = 0xFFFF0003 ,    /**< ²¢·¢·ÃÎÊµ¼ÖÂ³åÍ»  */
+    TEE_ERROR_EXCESS_DATA = 0xFFFF0004 ,        /**< ²Ù×÷°üº¬µÄÊý¾ÝÌ«¶à  */
+    TEE_ERROR_BAD_FORMAT = 0xFFFF0005 ,         /**< Êý¾Ý¸ñÊ½²»ÕýÈ·  */
+    TEE_ERROR_BAD_PARAMETERS = 0xFFFF0006 ,     /**< ²ÎÊýÎÞÐ§  */
+    TEE_ERROR_BAD_STATE = 0xFFFF0007,           /**< µ±Ç°×´Ì¬ÏÂµÄ²Ù×÷ÎÞÐ§  */
+    TEE_ERROR_ITEM_NOT_FOUND = 0xFFFF0008,      /**< ÇëÇóµÄÊý¾ÝÎ´ÕÒµ½  */
+    TEE_ERROR_NOT_IMPLEMENTED = 0xFFFF0009,     /**< ÇëÇóµÄ²Ù×÷´æÔÚµ«ÔÝÎ´ÊµÏÖ  */
+    TEE_ERROR_NOT_SUPPORTED = 0xFFFF000A,       /**< ÇëÇóµÄ²Ù×÷ÓÐÐ§µ«Î´Ö§³Ö  */
+    TEE_ERROR_NO_DATA = 0xFFFF000B,             /**< Êý¾Ý´íÎó  */
+    TEE_ERROR_OUT_OF_MEMORY = 0xFFFF000C,       /**< ÏµÍ³Ã»ÓÐ¿ÉÓÃ×ÊÔ´  */
+    TEE_ERROR_BUSY = 0xFFFF000D,                /**< ÏµÍ³·±Ã¦  */
+    TEE_ERROR_COMMUNICATION = 0xFFFF000E,       /**< ÓëµÚÈý·½Í¨ÐÅÊ§°Ü  */
+    TEE_ERROR_SECURITY = 0xFFFF000F,            /**< ¼ì²âµ½°²È«´íÎó  */
+    TEE_ERROR_SHORT_BUFFER = 0xFFFF0010,        /**< ÄÚ´æÊäÈë³¤¶ÈÐ¡ÓÚÊä³ö³¤¶È  */
+    TEE_PENDING = 0xFFFF2000,                   /**< ¿ÉÐÅ·þÎñ´¦ÓÚµÈ´ý×´Ì¬(Òì²½µ÷ÓÃ) */
+    TEE_PENDING2 = 0xFFFF2001,                  /**< ¿ÉÐÅ·þÎñ´¦ÓÚµÈ´ý×´Ì¬2(ÃüÁîÎ´Íê³É) */
+    TEE_ERROR_TIMEOUT = 0xFFFF3001,             /**< ÇëÇó³¬Ê± */
+    TEE_ERROR_OVERFLOW = 0xFFFF300f,            /**< ¼ÆËãÒç³ö */
+    TEE_ERROR_TARGET_DEAD = 0xFFFF3024,          /**< Trusted Application±ÀÀ£  */
+    TEE_ERROR_STORAGE_NO_SPACE = 0xFFFF3041,    /**< Ã»ÓÐ×ã¹»µÄFlash¿Õ¼äÀ´´æ´¢ÎÄ¼þ */
+    TEE_ERROR_MAC_INVALID = 0xFFFF3071,         /**< MACÖµÐ£Ñé´íÎó  */
+    TEE_ERROR_SIGNATURE_INVALID = 0xFFFF3072,   /**< Ð£ÑéÊ§°Ü */
+    TEE_ERROR_TIME_NOT_SET = 0xFFFF5000,        /**< Ê±¼äÎ´ÉèÖÃ */
+    TEE_ERROR_TIME_NEEDS_RESET = 0xFFFF5001,    /**< Ê±¼äÐèÒªÖØÖÃ */
+    TEE_FAIL = 0xFFFF5002,    /**< Ê±¼äÐèÒªÖØÖÃ */
+    TEE_ERROR_TIMER = 0xFFFF6000,
+    TEE_ERROR_TIMER_CREATE_FAILED,
+    TEE_ERROR_TIMER_DESTORY_FAILED,
+    TEE_ERROR_TIMER_NOT_FOUND,
+    TEE_ERROR_RPMB_BASE = 0xFFFF7000,    /**< RPMB°²È«´æ´¢´íÎóÂë»ùÖ· */
+    TEE_ERROR_RPMB_GENERIC = 0xFFFF7001,    /**< RPMB¿ØÖÆÆ÷Í¨ÓÃ´íÎó */
+    TEE_ERROR_RPMB_MAC_FAIL,    /**< RPMB¿ØÖÆÆ÷MACÐ£Ñé´íÎó */
+    TEE_ERROR_RPMB_COUNTER_FAIL,    /**< RPMB¿ØÖÆÆ÷¼ÆÊýÆ÷Ð£Ñé´íÎó */
+    TEE_ERROR_RPMB_ADDR_FAIL,    /**< RPMB¿ØÖÆÆ÷µØÖ·Ð£Ñé´íÎó */
+    TEE_ERROR_RPMB_WRITE_FAIL,    /**< RPMB¿ØÖÆÆ÷Ð´´íÎó */
+    TEE_ERROR_RPMB_READ_FAIL,    /**< RPMB¿ØÖÆÆ÷¶Á´íÎó */
+    TEE_ERROR_RPMB_KEY_NOT_PROGRAM,    /**< RPMB KeyÎ´Ð´Èë */
+    TEE_ERROR_RPMB_RESP_UNEXPECT_MSGTYPE = 0xFFFF7100,    /**< RPMBÓ¦´ðÊý¾ÝµÄÏûÏ¢ÀàÐÍÐ£Ñé´íÎó */
+    TEE_ERROR_RPMB_RESP_UNEXPECT_BLKCNT,    /**< RPMBÓ¦´ðÊý¾ÝµÄÊý¾Ý¿éÐ£Ñé´íÎó */
+    TEE_ERROR_RPMB_RESP_UNEXPECT_BLKIDX,    /**< RPMBÓ¦´ðÊý¾ÝµÄÊý¾ÝµØÖ·Ð£Ñé´íÎó */
+    TEE_ERROR_RPMB_RESP_UNEXPECT_WRCNT,    /**< RPMBÓ¦´ðÊý¾ÝµÄ¼ÆÊýÆ÷Ð£Ñé´íÎó */
+    TEE_ERROR_RPMB_RESP_UNEXPECT_NONCE,    /**< RPMBÓ¦´ðÊý¾ÝµÄËæ»úÊýÐ£Ñé´íÎó */
+    TEE_ERROR_RPMB_RESP_UNEXPECT_MAC,    /**< RPMBÓ¦´ðÊý¾ÝµÄMACÐ£Ñé´íÎó */
+    TEE_ERROR_RPMB_FILE_NOT_FOUND,    /**< RPMB°²È«´æ´¢ÎÄ¼þ²»´æÔÚ */
+    TEE_ERROR_RPMB_NOSPC,    /**< RPMB°²È«´æ´¢´ÅÅÌ¿Õ¼ä²»×ã */
+    TEE_FAIL2
+};
+
+/**
+ * @ingroup  TEE_CommonDef
+ *
+ * Login·½Ê½
+ */
+enum TEE_LoginMethod {
+    TEE_LOGIN_PUBLIC = 0x0,             /**< ²»ÐèÒªLoginÊý¾Ý  */
+    TEE_LOGIN_USER,                     /**< Ìá¹©ÓÃ»§ÔËÐÐ·Ç°²È«Ó¦ÓÃ³ÌÐòµÄLoginÊý¾Ý  */
+    TEE_LOGIN_GROUP,                    /**< Ìá¹©×éÓÃ»§ÔËÐÐ·Ç°²È«Ó¦ÓÃ³ÌÐòµÄLoginÊý¾Ý  */
+    TEE_LOGIN_APPLICATION = 0x4,        /**< Ìá¹©·Ç°²È«Ó¦ÓÃ³ÌÐò×Ô¼ºµÄLoginÊý¾Ý  */
+    TEE_LOGIN_USER_APPLICATION = 0x5,   /**< Ìá¹©ÓÃ»§ÔËÐÐ·Ç°²È«Ó¦ÓÃ³ÌÐòµÄLoginÊý¾Ý£¬
+                                             ÒÔ¼°·Ç°²È«Ó¦ÓÃ³ÌÐò×Ô¼ºµÄLoginÊý¾Ý*/
+    TEE_LOGIN_GROUP_APPLICATION = 0x6,  /**< Ìá¹©×éÓÃ»§ÔËÐÐ·Ç°²È«Ó¦ÓÃ³ÌÐòµÄLoginÊý¾Ý£¬
+                                             ÒÔ¼°·Ç°²È«Ó¦ÓÃ³ÌÐò×Ô¼ºµÄLoginÊý¾Ý*/
+    TEE_LOGIN_IDENTIFY = 0x7,           /**< µ÷ÓÃ°²È«´æ´¢ÒªÓÃ  */
+};
+
+/**
+ * @ingroup  TEE_CommonDef
+ *
+ * ClientµÄÉí·Ý±êÊ¶
+ */
+typedef struct
+{
+    uint32_t login;     /**< loginµÄ·½Ê½ */
+    TEE_UUID uuid;      /**< ClientµÄUUID */
+}TEE_Identity;
+
+/**
+ * @ingroup TEE_CommonDef
+ * º¯Êý·µ»ØÖµÀàÐÍ¶¨Òå
+ *
+ * ÓÃÓÚ±íÊ¾º¯Êý·µ»Ø½á¹û
+ */
+typedef enum TEE_Result_Value   TEE_Result;
+typedef TEE_Result  TEEC_Result;
+
+#define TEE_ORIGIN_TEE  0x00000003
+#define TEE_ORIGIN_TRUSTED_APP 0x00000004
+
+#ifndef _TEE_TASessionHandle
+#define _TEE_TASessionHandle
+typedef uint32_t TEE_TASessionHandle;
+#endif
+
+#include "dx_infra_api.h"
+#include "tee_crypto_api.h"
+#include "tee_mem_mgmt_api.h"
+#include "tee_property_api.h"
+#include "tee_time_api.h"
+#include "tee_trusted_storage_api.h"
+#include "tee_core_api.h"
+
+#endif

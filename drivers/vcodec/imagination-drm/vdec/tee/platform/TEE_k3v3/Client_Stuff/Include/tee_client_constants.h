@@ -1,0 +1,175 @@
+ï»¿/*!
+ *****************************************************************************
+ *
+ * @File       tee_client_constants.h
+ * ---------------------------------------------------------------------------
+ *
+ * Copyright (c) Imagination Technologies Ltd.
+ * 
+ * The contents of this file are subject to the MIT license as set out below.
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a 
+ * copy of this software and associated documentation files (the "Software"), 
+ * to deal in the Software without restriction, including without limitation 
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+ * and/or sell copies of the Software, and to permit persons to whom the 
+ * Software is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in 
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
+ * THE SOFTWARE.
+ * 
+ * Alternatively, the contents of this file may be used under the terms of the 
+ * GNU General Public License Version 2 ("GPL")in which case the provisions of
+ * GPL are applicable instead of those above. 
+ * 
+ * If you wish to allow use of your version of this file only under the terms 
+ * of GPL, and not to allow others to use your version of this file under the 
+ * terms of the MIT license, indicate your decision by deleting the provisions 
+ * above and replace them with the notice and other provisions required by GPL 
+ * as set out in the file called "GPLHEADER" included in this distribution. If 
+ * you do not delete the provisions above, a recipient may use your version of 
+ * this file under the terms of either the MIT license or GPL.
+ * 
+ * This License is also included in this distribution in the file called 
+ * "MIT_COPYING".
+ *
+ *****************************************************************************/
+
+#ifndef _TEE_CLIENT_CONSTANTS_H_
+#define _TEE_CLIENT_CONSTANTS_H_
+
+
+/**
+ * @ingroup  TEEC_COMMON_DATA
+ *
+ * º¯Êý·µ»ØµÄ´íÎóÂë
+ */
+enum TEEC_ReturnCode {
+    TEEC_SUCCESS = 0x0,  /**< º¯Êý·µ»Ø³É¹¦  */
+    TEEC_ERROR_INVALID_CMD,                      /**< ·Ç·¨ÃüÁî£¬°²È«·þÎñ²»Ö§³ÖµÄÃüÁî */
+    TEEC_ERROR_SERVICE_NOT_EXIST,                /**< °²È«·þÎñ²»´æÔÚ */
+    TEEC_ERROR_SESSION_NOT_EXIST,                /**< ¿Í»§¶ËÓ¦ÓÃÓë°²È«·þÎñµÄÁ´½Ó²»´æÔÚ */
+    TEEC_ERROR_SESSION_MAXIMUM,                  /**< °²È«·þÎñµÄÁ´½ÓÊýÒÑÂú */
+    TEEC_ERROR_REGISTER_EXIST_SERVICE,           /**< ×¢²áÒÑ¾­´æÔÚµÄ°²È«·þÎñ */
+    TEEC_ERROR_TAGET_DEAD_FATAL,                 /**< °²È«·þÎñGlobal³ö´í £¬(°²È«·þÎñGlobalÊÇËùÓÐ°²È«·þÎñµÄ»ù´¡) */
+    TEEC_ERROR_READ_DATA,                        /**< ¶ÁÈ¡ÎÄ¼þ´íÎó  */
+    TEEC_ERROR_WRITE_DATA,                       /**< Ð´ÈëÎÄ¼þ´íÎó  */
+    TEEC_ERROR_TRUNCATE_OBJECT,                  /**< ½Ø¶ÏÎÄ¼þ´íÎó  */
+    TEEC_ERROR_SEEK_DATA,                        /**< ²éÕÒÎÄ¼þ´íÎó  */
+    TEEC_ERROR_FSYNC_DATA,                       /**< Í¬²½ÎÄ¼þ´íÎó  */
+    TEEC_ERROR_RENAME_OBJECT,                    /**< ÖØÃüÃûÎÄ¼þ´íÎó  */
+    TEEC_ERROR_TRUSTED_APP_LOAD_ERROR,           /**< ´ò¿ª»á»°Ê±£¬¼ÓÔØ°²È«·þÎñÊ§°Ü*/
+    TEEC_ERROR_GENERIC = 0xFFFF0000,  /**< Í¨ÓÃ´íÎó£¬³õÊ¼»¯°²È«·þÎñÊ§°Ü  */
+    TEEC_ERROR_ACCESS_DENIED = 0xFFFF0001 ,  /**< È¨ÏÞÐ£ÑéÊ§°Ü£¬
+            ´ò¿ªTEE»·¾³¡¢´ò¿ª»á»°ºÍ·¢ËÍÃüÁî¶¼»á½øÐÐÈ¨ÏÞµÄÐ£Ñé£¬
+            È¨ÏÞÐ£Ñé²»Í¨¹ý»á·µ»Ø´ËÀà´íÎó  */
+    TEEC_ERROR_CANCEL = 0xFFFF0002 ,  /**< ²Ù×÷ÒÑÈ¡Ïû£¬
+            Èç¹û²ÎÊýµÄÈ¡Ïû±êÖ¾Î»ÒÑÖÃÎ»£¬ÔÙ¶Ô´Ë²ÎÊý½øÐÐ²Ù×÷Ê±·µ»Ø´ËÀà´íÎó */
+    TEEC_ERROR_ACCESS_CONFLICT = 0xFFFF0003 ,  /**< ²¢·¢·ÃÎÊµ¼ÖÂÈ¨ÏÞ³åÍ»£¬
+            °²È«´æ´¢·þÎñÖÐ¶ÔÎÄ¼þµÄ²¢·¢·ÃÎÊ¿ÉÄÜ»á²úÉú´ËÀà´íÎó  */
+    TEEC_ERROR_EXCESS_DATA = 0xFFFF0004 ,  /**< ²Ù×÷°üº¬µÄÊý¾ÝÌ«¶à £¬°²È«·þÎñÎÞ·¨½âÎö */
+    TEEC_ERROR_BAD_FORMAT = 0xFFFF0005 ,  /**< Êý¾Ý¸ñÊ½²»ÕýÈ·£¬
+            ¿Í»§¶ËÓ¦ÓÃÌî³äµÄ²ÎÊý¸ñÊ½²»Âú×ã¿Í»§¶ËÓ¦ÓÃÓë°²È«·þÎñµÄÍ¨ÐÅÐ­Òé£¬
+            °²È«Ó¦ÓÃÎÞ·¨½âÎö  */
+    TEEC_ERROR_BAD_PARAMETERS = 0xFFFF0006 ,  /**< ²ÎÊýÎÞÐ§£¬Èë²ÎÎª¿Õ»ò·Ç·¨µÈ´íÎó  */
+    TEEC_ERROR_BAD_STATE = 0xFFFF0007,  /**< µ±Ç°×´Ì¬ÏÂµÄ²Ù×÷ÎÞÐ§£¬
+            ÇëÇó°²È«´æ´¢·þÎñ²Ù×÷Ê±£¬Èç¹ûÃ»ÓÐ³õÊ¼»¯°²È«´æ´¢·þÎñ£¬»á·µ»Ø´ËÀà´íÎó*/
+    TEEC_ERROR_ITEM_NOT_FOUND = 0xFFFF0008,  /**< ÇëÇóµÄÊý¾ÝÎ´ÕÒµ½  */
+    TEEC_ERROR_NOT_IMPLEMENTED = 0xFFFF0009,  /**< ÇëÇóµÄ²Ù×÷´æÔÚµ«ÔÝÎ´ÊµÏÖ£¬
+            ÇëÇóÈ¡Ïû²Ù×÷Ê±·µ»Ø´ËÀà´íÎó  */
+    TEEC_ERROR_NOT_SUPPORTED = 0xFFFF000A,  /**< ÇëÇóµÄ²Ù×÷ÓÐÐ§µ«Î´Ö§³Ö£¬
+            ÇëÇó°²È«¼Ó½âÃÜ·þÎñµÄÒ»Ð©Ëã·¨ÈçDSAµÈÊ±·µ»Ø´ËÀà´íÎó  */
+    TEEC_ERROR_NO_DATA = 0xFFFF000B,  /**< Êý¾Ý´íÎó £¬ÇëÇóµÄ²Ù×÷ÕÒ²»µ½¶ÔÓ¦µÄÊý¾Ý */
+    TEEC_ERROR_OUT_OF_MEMORY = 0xFFFF000C,  /**< ÏµÍ³¿ÉÓÃ×ÊÔ´²»×ã£¬
+            ÄÚ´æÉêÇëÊ§°Ü»á·µ»Ø´ËÀà´íÎó  */
+    TEEC_ERROR_BUSY = 0xFFFF000D,  /**< ÏµÍ³·±Ã¦£¬ÏµÍ³¿ÉÄÜÕýÔÚ¶ÀÕ¼Ò»Ð©×ÊÔ´  */
+    TEEC_ERROR_COMMUNICATION = 0xFFFF000E,  /**< ·Ç°²È«ÊÀ½çÓ¦ÓÃ³ÌÐòÓë
+            °²È«Ó¦ÓÃÍ¨ÐÅÊ±·¢Éú´íÎó  */
+    TEEC_ERROR_SECURITY = 0xFFFF000F,  /**< ¼ì²âµ½°²È«´íÎó£¬°²È«ÊÀ½ç·¢Éú´íÎó  */
+    TEEC_ERROR_SHORT_BUFFER = 0xFFFF0010,  /**< ÄÚ´æÊäÈë³¤¶ÈÐ¡ÓÚÊä³ö³¤¶È£¬
+            Ê¹ÓÃÀàÐÍÎª#TEEC_MEMREF_TEMP_OUTPUTÊ±ÐèÒª×¢Òâ´ËÀà´íÎó  */
+    TEEC_ERROR_MAC_INVALID = 0xFFFF3071,  /**< MACÖµÐ£Ñé´íÎó  */
+};
+
+/**
+ * @ingroup  TEEC_COMMON_DATA
+ *
+ * º¯Êý·µ»Ø´íÎóÂëµÄÀ´Ô´
+ */
+enum TEEC_ReturnCodeOrigin {
+    TEEC_ORIGIN_API = 0x1,  /**< ´íÎóÂëÀ´×Ô¿Í»§¶ËAPI  */
+    TEEC_ORIGIN_COMMS = 0x2,  /**< ´íÎóÂëÀ´×Ô·Ç°²È«ÊÀ½çÓë°²È«ÊÀ½çµÄÍ¨ÐÅ  */
+    TEEC_ORIGIN_TEE = 0x3,  /**< ´íÎóÂëÀ´×Ô°²È«ÊÀ½ç  */
+    TEEC_ORIGIN_TRUSTED_APP = 0x4,  /**< ´íÎóÂëÀ´×Ô°²È«·þÎñ  */
+};
+
+/**
+ * @ingroup  TEEC_COMMON_DATA
+ *
+ * ¹²ÏíÄÚ´æ±êÊ¶
+ */
+enum TEEC_SharedMemCtl {
+    TEEC_MEM_INPUT = 0x1,  /**< ¹²ÏíÄÚ´æµÄÊý¾ÝÁ÷ÊÇ´Ó¿Í»§¶ËÓ¦ÓÃµ½°²È«·þÎñ  */
+    TEEC_MEM_OUTPUT = 0x2,  /**< ¹²ÏíÄÚ´æµÄÊý¾ÝÁ÷ÊÇ´Ó°²È«·þÎñµ½¿Í»§¶ËÓ¦ÓÃ  */
+    TEEC_MEM_INOUT = 0x3,  /**< ¹²ÏíÄÚ´æ¿ÉÔÚ¿Í»§¶ËÓ¦ÓÃÓë°²È«·þÎñÖ®¼äË«Ïò´«µÝ  */
+};
+
+/**
+ * @ingroup  TEEC_COMMON_DATA
+ *
+ * ²ÎÊýÀàÐÍ¶¨Òå
+ */
+enum TEEC_ParamType {
+    TEEC_NONE = 0x0,  /**< ²ÎÊýÃ»ÓÐÊ¹ÓÃ  */
+    TEEC_VALUE_INPUT = 0x01,  /**< ÓëÀàÐÍ#TEEC_ValueÏà¶ÔÓ¦£¬Ö»ÄÜ×÷ÎªÊäÈë£¬
+    Êý¾ÝÁ÷ÊÇ´Ó¿Í»§¶ËÓ¦ÓÃµ½°²È«·þÎñ*/
+    TEEC_VALUE_OUTPUT = 0x02,  /**< ÓëÀàÐÍ#TEEC_ValueÏà¶ÔÓ¦£¬Ö»ÄÜ×÷ÎªÊä³ö£¬
+    Êý¾ÝÁ÷ÊÇ´Ó°²È«·þÎñµ½¿Í»§¶ËÓ¦ÓÃ*/
+    TEEC_VALUE_INOUT = 0x03,  /**< ÓëÀàÐÍ#TEEC_ValueÏà¶ÔÓ¦£¬¼È¿ÉÊäÈëÒ²¿ÉÊä³ö  */
+    TEEC_MEMREF_TEMP_INPUT = 0x05,  /**< ÓëÀàÐÍ#TEEC_TempMemoryReferenceÏà¶ÔÓ¦£¬
+    Ö»ÄÜ×÷ÎªÊäÈë£¬Êý¾ÝÁ÷ÊÇ´Ó¿Í»§¶ËÓ¦ÓÃµ½°²È«·þÎñ  */
+    TEEC_MEMREF_TEMP_OUTPUT = 0x06,  /**< ÓëÀàÐÍ#TEEC_TempMemoryReferenceÏà¶ÔÓ¦£¬
+    Ö»ÄÜ×÷ÎªÊä³ö£¬Êý¾ÝÁ÷ÊÇ´Ó°²È«·þÎñµ½¿Í»§¶ËÓ¦ÓÃ  */
+    TEEC_MEMREF_TEMP_INOUT = 0x07,  /**< ÓëÀàÐÍ#TEEC_TempMemoryReferenceÏà¶ÔÓ¦£¬
+    ¼È¿ÉÊäÈëÒ²¿ÉÊä³ö£¬¿ÉÔÚ¿Í»§¶ËÓ¦ÓÃÓë°²È«·þÎñÖ®¼äË«Ïò´«µÝ*/
+    TEEC_MEMREF_WHOLE = 0xc,  /**< ÓëÀàÐÍ#TEEC_RegisteredMemoryReference
+    Ïà¶ÔÓ¦£¬ÒýÓÃÕû¿éÄÚ´æ £¬Êý¾ÝÁ÷ÓëËùÖ¸ÏòµÄ¹²ÏíÄÚ´æµÄ±êÊ¶#TEEC_SharedMemCtlÒ»ÖÂ */
+    TEEC_MEMREF_PARTIAL_INPUT = 0xd,  /**< ÓëÀàÐÍ#TEEC_RegisteredMemoryReferenceÏà¶ÔÓ¦£¬
+    Ö»ÄÜ×÷ÎªÊäÈë£¬Êý¾ÝÁ÷ÊÇ´Ó¿Í»§¶ËÓ¦ÓÃµ½°²È«·þÎñ */
+    TEEC_MEMREF_PARTIAL_OUTPUT = 0xe,  /**< ÓëÀàÐÍ#TEEC_RegisteredMemoryReference
+    Ïà¶ÔÓ¦£¬Ö»ÄÜ×÷ÎªÊä³ö£¬Êý¾ÝÁ÷ÊÇ´Ó°²È«·þÎñµ½¿Í»§¶ËÓ¦ÓÃ */
+    TEEC_MEMREF_PARTIAL_INOUT = 0xf  /**< ÓëÀàÐÍ#TEEC_RegisteredMemoryReferenceÏà¶ÔÓ¦£¬
+    ¼È¿ÉÊäÈëÒ²¿ÉÊä³ö£¬¿ÉÔÚ¿Í»§¶ËÓ¦ÓÃÓë°²È«·þÎñÖ®¼äË«Ïò´«µÝ*/
+};
+
+/****************************************************
+ *		Session Login Methods
+ ****************************************************/
+/**
+ * @ingroup  TEEC_COMMON_DATA
+ *
+ * Login·½Ê½
+ */
+enum TEEC_LoginMethod {
+    TEEC_LOGIN_PUBLIC = 0x0,  /**< ²»ÐèÒªLoginÊý¾Ý  */
+    TEEC_LOGIN_USER,  /**< Ìá¹©ÓÃ»§ÔËÐÐ¿Í»§¶ËÓ¦ÓÃµÄLoginÊý¾Ý  */
+    TEEC_LOGIN_GROUP,  /**< Ìá¹©×éÓÃ»§ÔËÐÐ¿Í»§¶ËÓ¦ÓÃµÄLoginÊý¾Ý  */
+    TEEC_LOGIN_APPLICATION = 0x4,  /**< Ìá¹©¿Í»§¶ËÓ¦ÓÃ×Ô¼ºµÄLoginÊý¾Ý  */
+    TEEC_LOGIN_USER_APPLICATION = 0x5,  /**< Ìá¹©ÓÃ»§ÔËÐÐ¿Í»§¶ËÓ¦ÓÃ
+                      µÄLoginÊý¾Ý£¬ÒÔ¼°¿Í»§¶ËÓ¦ÓÃ×Ô¼ºµÄLoginÊý¾Ý*/
+    TEEC_LOGIN_GROUP_APPLICATION = 0x6,  /**< Ìá¹©×éÓÃ»§ÔËÐÐ¿Í»§¶ËÓ¦ÓÃ
+                      µÄLoginÊý¾Ý£¬ÒÔ¼°¿Í»§¶ËÓ¦ÓÃ×Ô¼ºµÄLoginÊý¾Ý*/
+    TEEC_LOGIN_IDENTIFY = 0x7,  /**< Ê¹ÓÃ°²È«´æ´¢Ê±ÐèÒªÌá¹©LoginÊý¾Ý  */
+};
+#define AGENT_FS_ID 0x46536673      //FSfs
+#define AGENT_MISC_ID 0x4d495343    //MISC
+
+#endif

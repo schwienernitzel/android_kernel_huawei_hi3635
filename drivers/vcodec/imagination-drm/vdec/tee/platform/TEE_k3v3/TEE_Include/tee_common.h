@@ -1,0 +1,357 @@
+ï»¿/*!
+ *****************************************************************************
+ *
+ * @File       tee_common.h
+ * ---------------------------------------------------------------------------
+ *
+ * Copyright (c) Imagination Technologies Ltd.
+ * 
+ * The contents of this file are subject to the MIT license as set out below.
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a 
+ * copy of this software and associated documentation files (the "Software"), 
+ * to deal in the Software without restriction, including without limitation 
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+ * and/or sell copies of the Software, and to permit persons to whom the 
+ * Software is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in 
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
+ * THE SOFTWARE.
+ * 
+ * Alternatively, the contents of this file may be used under the terms of the 
+ * GNU General Public License Version 2 ("GPL")in which case the provisions of
+ * GPL are applicable instead of those above. 
+ * 
+ * If you wish to allow use of your version of this file only under the terms 
+ * of GPL, and not to allow others to use your version of this file under the 
+ * terms of the MIT license, indicate your decision by deleting the provisions 
+ * above and replace them with the notice and other provisions required by GPL 
+ * as set out in the file called "GPLHEADER" included in this distribution. If 
+ * you do not delete the provisions above, a recipient may use your version of 
+ * this file under the terms of either the MIT license or GPL.
+ * 
+ * This License is also included in this distribution in the file called 
+ * "MIT_COPYING".
+ *
+ *****************************************************************************/
+
+/** @defgroup TEE_API °²È«²à½Ó¿Ú */
+/** @defgroup TEE_COMMON_DATA ¹«¹²Êý¾Ý¶¨Òå
+* @ingroup TEE_API
+*/
+
+#ifndef __TEE_COMMON_H_
+#define __TEE_COMMON_H_
+
+#define CIPHER_ENCRYPT 0
+#define CIPHER_DECRYPT 1
+
+#define MD5_OUTPUT_LEN 16
+#define SHA1_OUTPUT_LEN 20
+#define SHA224_OUTPUT_LEN 28
+#define SHA256_OUTPUT_LEN 32
+#define SHA384_OUTPUT_LEN 48
+#define SHA512_OUTPUT_LEN 64
+#define HMAC_KEY_LEN 16
+#define HMAC_DATA_LEN 50
+#define HMAC_OUTPUT_LEN 16
+#define AES_128_CBC_LEN 16
+#define AES_128_ECB_LEN 16
+#define AES_128_CTR_LEN 16
+#define AES_128_XTS_LEN 16
+#define DES_ECB_LEN 8
+#define DES_CBC_LEN 8
+#define DES3_CBC_LEN 8
+#define DES3_ECB_LEN 8
+#define IGNORE_PARAM  0xff
+#if 1
+/**
+ * @ingroup  TEE_COMMON_DATA
+ * ÃÜÔ¿ÅÉÉúÊ±²¹³ä½á¹¹Ìå×î´ó×Ö½Ú
+ *
+*/
+#define TEE_DK_MAX_SIZE_OF_OTHER_INFO  64 /*bytes*/
+#endif
+
+/**
+ * @ingroup  TEE_COMMON_DATA
+ *
+ * °²È«·þÎñGlobal
+ */
+#define TEE_SERVICE_GLOBAL \
+{ \
+    0x00000000, \
+    0x0000, \
+    0x0000, \
+    { \
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 \
+    } \
+}
+
+/**
+ * @ingroup  TEE_COMMON_DATA
+ *
+ * °²È«·þÎñEcho
+ */
+#define TEE_SERVICE_ECHO \
+{ \
+    0x01010101, \
+    0x0101, \
+    0x0101, \
+    { \
+        0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01 \
+    } \
+}
+
+/**
+ * @ingroup  TEE_COMMON_DATA
+ *
+ * °²È«´æ´¢·þÎñ
+ */
+#define TEE_SERVICE_STORAGE \
+{ \
+    0x02020202, \
+    0x0202, \
+    0x0202, \
+    { \
+        0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02 \
+    } \
+}
+
+/**
+ * @ingroup  TEE_COMMON_DATA
+ *
+ * °²È«·þÎñUT²âÊÔ
+ */
+#define TEE_SERVICE_UT \
+{ \
+    0x03030303, \
+    0x0303, \
+    0x0303, \
+    { \
+        0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03 \
+    } \
+}
+
+/**
+ * @ingroup  TEE_COMMON_DATA
+ *
+ * ¼Ó½âÃÜ·þÎñ
+ */
+#define TEE_SERVICE_CRYPT \
+{ \
+    0x04040404, \
+    0x0404, \
+    0x0404, \
+    { \
+        0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04 \
+    } \
+}
+
+/**
+ * @ingroup  TEE_COMMON_DATA
+ *
+ * °²È«·þÎñglobalÖ§³ÖµÄÃüÁîID
+ */
+enum global_service_cmd_id {
+    GLOBAL_CMD_ID_INVALID = 0x0,    /**< Global Task ÎÞÐ§ID*/
+    GLOBAL_CMD_ID_BOOT_ACK,         /**< Global Task Æô¶¯Ó¦´ð*/
+    GLOBAL_CMD_ID_OPEN_SESSION,     /**< Global Task ´ò¿ªSession*/
+    GLOBAL_CMD_ID_CLOSE_SESSION,    /**< Global Task ¹Ø±ÕSession*/
+    GLOBAL_CMD_ID_LOAD_SECURE_APP,  /**< Global Task ¶¯Ì¬¼ÓÔØ°²È«Ó¦ÓÃ*/
+    GLOBAL_CMD_ID_NEED_LOAD_APP,    /**< Global Task ÅÐ¶ÏÊÇ·ñÊÇÐèÒª¼ÓÔØ°²È«Ó¦ÓÃ*/
+    GLOBAL_CMD_ID_REGISTER_AGENT,   /**< Global Task ×¢²á´úÀí*/
+    GLOBAL_CMD_ID_UNREGISTER_AGENT, /**< Global Task ×¢Ïú´úÀí*/
+    GLOBAL_CMD_ID_REGISTER_NOTIFY_MEMORY,   /**< Global Task ×¢²áÒì²½µ÷ÓÃ»º³åÇø*/
+    GLOBAL_CMD_ID_UNREGISTER_NOTIFY_MEMORY, /**< Global Task ×¢ÏúÒì²½µ÷ÓÃ»º³åÇø*/
+    GLOBAL_CMD_ID_INIT_CONTENT_PATH,      /**< Global Task³õÊ¼»¯content path*/
+    GLOBAL_CMD_ID_TERMINATE_CONTENT_PATH,   /**< Global TaskÊÍ·Åcontent path*/
+    GLOBAL_CMD_ID_ALLOC_EXCEPTION_MEM,  /**< Global Task ·ÖÅäÒì³£ÐÅÏ¢±£´æ¿Õ¼ä*/
+    GLOBAL_CMD_ID_TEE_TIME,         /**< Global Task »ñÈ¡°²È«OSµÄÊ±¼ä */
+    GLOBAL_CMD_ID_UNKNOWN         = 0x7FFFFFFE, /**< Global Task Î´ÖªID*/
+    GLOBAL_CMD_ID_MAX             = 0x7FFFFFFF  /**< Global Task ×î´óID*/
+};
+
+/**
+ * @ingroup  TEE_COMMON_DATA
+ *
+ * °²È«·þÎñechoÖ§³ÖµÄÃüÁîID
+ */
+enum echo_service_cmd_id {
+    ECHO_CMD_ID_INVALID = 0x10,     /**< Echo Task ÎÞÐ§ID*/
+    ECHO_CMD_ID_SEND_CMD,           /**< Echo Task·¢ËÍÃüÁî*/
+    ECHO_CMD_ID_UNKNOWN         = 0x7FFFFFFE,   /**< Echo Task Î´ÖªID*/
+    ECHO_CMD_ID_MAX             = 0x7FFFFFFF    /**< Echo Task ×î´óID*/
+};
+
+/**
+ * @ingroup  TEE_COMMON_DATA
+ *
+ * °²È«·þÎñCRYPTOÖ§³ÖµÄÃüÁîID, °üÀ¨¶Ô³Æ¼Ó½âÃÜ¡¢·Ç¶Ô³Æ¼Ó½âÃÜ¡¢ÕªÒªHMACµÈ\n
+ * ×¢Òâ:¶Ô³ÆËã·¨ÖÐµÄnopadÄ£Ê½ÐèÒªTA(Trusted Application£¬¿ÉÐÅÓ¦ÓÃ)À´×öÌî³ä
+ */
+enum crypt_service_cmd_id {
+    CRYPT_CMD_ID_INVALID = 0x10,            /**< ÎÞÐ§ID */
+    //CRYPT_CMD_ID_LOAD_LIBS,               /**< ¼ÓÔØ¼Ó½âÃÜ¿â */
+    //CRYPT_CMD_ID_UNLOAD_LIBS,             /**< Ð¶ÔØ¼Ó½âÃÜ¿â */
+    CRYPT_CMD_ID_ENCRYPT,                   /**< ¼ÓÃÜ */
+    CRYPT_CMD_ID_DECRYPT,                   /**< ½âÃÜ */
+    CRYPT_CMD_ID_MD5,                       /**< ÕªÒªËã·¨MD5 */
+    CRYPT_CMD_ID_SHA1,                      /**< ÕªÒªËã·¨SHA1 */
+    CRYPT_CMD_ID_SHA224,                    /**< ÕªÒªËã·¨SHA224 */
+    CRYPT_CMD_ID_SHA256,                    /**< ÕªÒªËã·¨SHA256 */
+    CRYPT_CMD_ID_SHA384,                    /**< ÕªÒªËã·¨SHA384 */
+    CRYPT_CMD_ID_SHA512,                    /**< ÕªÒªËã·¨SHA512 */
+    CRYPT_CMD_ID_HMAC_MD5,                  /**< HMAC MD5 */
+    CRYPT_CMD_ID_HMAC_SHA1,                 /**< HMAC SHA1 */
+    CRYPT_CMD_ID_HMAC_SHA224,               /**< HMAC SHA224 */
+    CRYPT_CMD_ID_HMAC_SHA256,               /**< HMAC SHA256 */
+    CRYPT_CMD_ID_HMAC_SHA384,               /**< HMAC SHA384 */
+    CRYPT_CMD_ID_HMAC_SHA512,               /**< HMAC SHA512 */
+    CRYPT_CMD_ID_CIPHER_AES_CBC,        /**< ¶Ô³Æ¼Ó½âÃÜAES 128bitsÃÜÔ¿ CBCÄ£Ê½ */
+    CRYPT_CMD_ID_CIPHER_AES_CBC_CTS,    /**< ¶Ô³Æ¼Ó½âÃÜAES 128bitsÃÜÔ¿ CBC_CTSÄ£Ê½ */
+    CRYPT_CMD_ID_CIPHER_AES_ECB,        /**< ¶Ô³Æ¼Ó½âÃÜAES 128bitsÃÜÔ¿ ECBÄ£Ê½ */
+	CRYPT_CMD_ID_CIPHER_AES_ECB_PKCS5,
+    CRYPT_CMD_ID_CIPHER_AES_CTR,        /**< ¶Ô³Æ¼Ó½âÃÜAES 128bitsÃÜÔ¿ CTRÄ£Ê½ */
+    CRYPT_CMD_ID_CIPHER_AES_CBC_MAC,    /**< ¶Ô³Æ¼Ó½âÃÜAES 128bitsÃÜÔ¿ CBC_MACÄ£Ê½ */
+    CRYPT_CMD_ID_CIPHER_AES_XCBC_MAC,   /**< ¶Ô³Æ¼Ó½âÃÜAES 128bitsÃÜÔ¿ XCBC_MACÄ£Ê½ */
+    CRYPT_CMD_ID_CIPHER_AES_CMAC,       /**< ¶Ô³Æ¼Ó½âÃÜAES 128bitsÃÜÔ¿ CMACÄ£Ê½ */
+    CRYPT_CMD_ID_CIPHER_AES_CCM,        /**< ¶Ô³Æ¼Ó½âÃÜAES 128bitsÃÜÔ¿ CCMÄ£Ê½ */
+    CRYPT_CMD_ID_CIPHER_AES_XTS,        /**< ¶Ô³Æ¼Ó½âÃÜAES 128bitsÃÜÔ¿ XTSÄ£Ê½ */
+    CRYPT_CMD_ID_CIPHER_DES_ECB,            /**< ¶Ô³Æ¼Ó½âÃÜDES ECBÄ£Ê½ */
+    CRYPT_CMD_ID_CIPHER_DES_CBC,            /**< ¶Ô³Æ¼Ó½âÃÜDES CBCÄ£Ê½ */
+    CRYPT_CMD_ID_CIPHER_DES3_ECB,           /**< ¶Ô³Æ¼Ó½âÃÜDES3 ECBÄ£Ê½ */
+    CRYPT_CMD_ID_CIPHER_DES3_CBC,           /**< ¶Ô³Æ¼Ó½âÃÜDES3 CBCÄ£Ê½ */
+    CRYPT_CMD_ID_CIPHER_RND,                /**< Ëæ»úÊýÄ£Ê½ */
+    CRYPT_CMD_ID_CIPHER_DK,                 /**< ÃÜÔ¿ÅÉÉúÄ£Ê½ */
+    CRYPT_CMD_ID_RSAES_PKCS1_V1_5,          /**< ·Ç¶Ô³Æ¼Ó½âÃÜPKCS1_V1_5Ä£Ê½ */
+    CRYPT_CMD_ID_RSAES_PKCS1_OAEP_MGF1_SHA1,/**< ·Ç¶Ô³Æ¼Ó½âÃÜOAEP_SHA1Ä£Ê½ */
+    CRYPT_CMD_ID_RSAES_PKCS1_OAEP_MGF1_SHA224,/**< ·Ç¶Ô³Æ¼Ó½âÃÜOAEP_SHA224Ä£Ê½ */
+    CRYPT_CMD_ID_RSAES_PKCS1_OAEP_MGF1_SHA256,/**< ·Ç¶Ô³Æ¼Ó½âÃÜOAEP_SHA256Ä£Ê½ */
+    CRYPT_CMD_ID_RSAES_PKCS1_OAEP_MGF1_SHA384,/**< ·Ç¶Ô³Æ¼Ó½âÃÜOAEP_SHA384Ä£Ê½ */
+    CRYPT_CMD_ID_RSAES_PKCS1_OAEP_MGF1_SHA512,/**< ·Ç¶Ô³Æ¼Ó½âÃÜOAEP_SHA512Ä£Ê½ */
+    CRYPT_CMD_ID_RSA_NOPAD,                 /**< ·Ç¶Ô³Æ¼Ó½âÃÜÎÞÌî³äÄ£Ê½ */
+    CRYPT_CMD_ID_RSASSA_PKCS1_V1_5_MD5,     /**< ·Ç¶Ô³ÆÇ©ÃûÑéÖ¤PKCS1_V1_5_MD5Ä£Ê½ */
+    CRYPT_CMD_ID_RSASSA_PKCS1_V1_5_SHA1,    /**< ·Ç¶Ô³ÆÇ©ÃûÑéÖ¤PKCS1_V1_5_SHA1Ä£Ê½ */
+    CRYPT_CMD_ID_RSASSA_PKCS1_V1_5_SHA224,  /**< ·Ç¶Ô³ÆÇ©ÃûÑéÖ¤PKCS1_V1_5_SHA224Ä£Ê½ */
+    CRYPT_CMD_ID_RSASSA_PKCS1_V1_5_SHA256,  /**< ·Ç¶Ô³ÆÇ©ÃûÑéÖ¤PKCS1_V1_5_SHA256Ä£Ê½ */
+    CRYPT_CMD_ID_RSASSA_PKCS1_V1_5_SHA384,  /**< ·Ç¶Ô³ÆÇ©ÃûÑéÖ¤PKCS1_V1_5_SHA384Ä£Ê½ */
+    CRYPT_CMD_ID_RSASSA_PKCS1_V1_5_SHA512,  /**< ·Ç¶Ô³ÆÇ©ÃûÑéÖ¤PKCS1_V1_5_SHA512Ä£Ê½ */
+    CRYPT_CMD_ID_RSASSA_PKCS1_PSS_MGF1_SHA1,/**< ·Ç¶Ô³ÆÇ©ÃûÑéÖ¤PSS_MGF1_SHA1Ä£Ê½ */
+    CRYPT_CMD_ID_RSASSA_PKCS1_PSS_MGF1_SHA224,/**< ·Ç¶Ô³ÆÇ©ÃûÑéÖ¤PSS_MGF1_SHA224Ä£Ê½ */
+    CRYPT_CMD_ID_RSASSA_PKCS1_PSS_MGF1_SHA256,/**< ·Ç¶Ô³ÆÇ©ÃûÑéÖ¤PSS_MGF1_SHA256Ä£Ê½ */
+    CRYPT_CMD_ID_RSASSA_PKCS1_PSS_MGF1_SHA384,/**< ·Ç¶Ô³ÆÇ©ÃûÑéÖ¤PSS_MGF1_SHA384Ä£Ê½ */
+    CRYPT_CMD_ID_RSASSA_PKCS1_PSS_MGF1_SHA512,/**< ·Ç¶Ô³ÆÇ©ÃûÑéÖ¤PSS_MGF1_SHA512Ä£Ê½ */
+    CRYPT_CMD_ID_DSA_SHA1,                  /**< ·Ç¶Ô³ÆÇ©ÃûÑéÖ¤DSAÄ£Ê½ */
+    CRYPT_CMD_ID_UNKNOWN = 0x7FFFFFFE,      /**< Î´ÖªÄ£Ê½ */
+    CRYPT_CMD_ID_MAX = 0x7FFFFFFF           /**< ×î´óCMD ID */
+};
+
+/**
+ * @ingroup  TEE_COMMON_DATA
+ *
+ * °²È«·þÎñCRYPTO×´Ì¬¶¨Òå
+ */
+typedef enum crypt_cmd_status{
+    CRYPT_INIT = 0,         /**< ³õÊ¼»¯ */
+    CRYPT_UPDATE,           /**< ¿éÔËËã */
+    CRYPT_UPDATEAAD,        /**< AEÖÐÈÏÖ¤Êý¾Ý¿éÔËËã */
+    CRYPT_DOFINAL,          /**< ½áÊø */
+    CRYPT_CMPFINAL,         /**< ½áÊø²¢ÑéÖ¤ */
+    CRYPT_SIGNDIGEST,       /**< Ç©Ãû */
+    CRYPT_VERIFYDIGEST,     /**< ÈÏÖ¤ */
+    CRYPT_STATUS_NUM        /**< ×´Ì¬¸öÊý */
+} crypt_status;
+
+/**
+ * @ingroup  TEE_COMMON_DATA
+ *
+ * °²È«·þÎñSTORAGEÖ§³ÖµÄÃüÁîID
+ */
+enum storage_service_cmd_id {
+    STORAGE_CMD_ID_INVALID = 0x10,          /**< Storage Task ÎÞÐ§ID*/
+    STORAGE_CMD_ID_OPEN,                    /**< Storage Task´ò¿ªÎÄ¼þ*/
+    STORAGE_CMD_ID_CLOSE,                   /**< Storage Task¹Ø±ÕÎÄ¼þ*/
+    STORAGE_CMD_ID_CLOSEALL,                /**< Storage Task¹Ø±ÕËùÓÐÎÄ¼þ*/
+    STORAGE_CMD_ID_READ,                    /**< Storage Task¶ÁÈ¡ÎÄ¼þ*/
+    STORAGE_CMD_ID_WRITE,                   /**< Storage TaskÐ´ÈëÎÄ¼þ*/
+    STORAGE_CMD_ID_SEEK,                    /**< Storage Task»ñÈ¡µ±Ç°ÎÄ¼þÎ»ÖÃ*/
+    STORAGE_CMD_ID_TELL,                    /**< Storage TaskÖØ¶¨Î»ÎÄ¼þ*/
+    STORAGE_CMD_ID_TRUNCATE,                /**< Storage Task¸Ä±äÎÄ¼þ´óÐ¡*/
+    STORAGE_CMD_ID_REMOVE,                  /**< Storage TaskÉ¾³ýÎÄ¼þ*/
+    STORAGE_CMD_ID_FINFO,                   /**< Storage Task·µ»ØÎÄ¼þ×´Ì¬*/
+    STORAGE_CMD_ID_FSYNC,                   /**< Storage TaskÍ¬²½ÎÄ¼þµ½´æ´¢Éè±¸*/
+    STORAGE_CMD_ID_UNKNOWN = 0x7FFFFFFE,    /**< Storage Task Î´ÖªID*/
+    STORAGE_CMD_ID_MAX = 0x7FFFFFFF         /**< Storage Task ×î´óID*/
+};
+#if 1
+/**
+ * ingroup  TEE_COMMON_DATA
+ *
+ * tee DK other structure, containing the optional data for KDF,
+ * if any data is not needed, then the pointer value and
+ * the size must be set to NULL
+ */
+typedef struct
+{
+    /* a unique object identifier (OID), indicating algorithm(s)
+    for which the keying data will be used*/
+    unsigned char    AlgorithmID[TEE_DK_MAX_SIZE_OF_OTHER_INFO];    /**< a unique object identifier (OID) */
+    unsigned int   SizeOfAlgorithmID;                           /**< size of AlgorithmID */
+    /* Public information contributed by the initiator */
+    unsigned char    PartyUInfo[TEE_DK_MAX_SIZE_OF_OTHER_INFO]; /**< Public information contributed by the initiator */
+    unsigned int   SizeOfPartyUInfo;                            /**< size of PartyUInfo */
+    /* Public information contributed by the responder */
+    unsigned char    PartyVInfo[TEE_DK_MAX_SIZE_OF_OTHER_INFO]; /**< Public information contributed by the responder */
+    unsigned int   SizeOfPartyVInfo;                            /**< size of PartyVInfo */
+    /* Mutually-known private information, e.g. shared information
+    communicated throgh a separate channel */
+    unsigned char    SuppPrivInfo[TEE_DK_MAX_SIZE_OF_OTHER_INFO];   /**< Mutually-known private information */
+    unsigned int   SizeOfSuppPrivInfo;                          /**< size of SuppPrivInfo */
+    /* Mutually-known public information, */
+    unsigned char    SuppPubInfo[TEE_DK_MAX_SIZE_OF_OTHER_INFO];    /**< Mutually-known public information */
+    unsigned int   SizeOfSuppPubInfo;                           /**< size of SuppPubInfo */
+}tee_DK_OtherInfo;
+
+/**
+ * ingroup  TEE_COMMON_DATA
+ *
+ * TEEµÄÃÜÔ¿ÅÉÉúº¯ÊýÄ£Ê½¶¨Òå
+*/
+typedef enum
+{
+    TEE_DK_ASN1_DerivMode = 0,                          /**< ASN1_DerivMode */
+    TEE_DK_ConcatDerivMode = 1,                         /**< ConcatDerivMode */
+    TEE_DK_X963_DerivMode = TEE_DK_ConcatDerivMode,     /**< X963_DerivMode */
+    TEE_DK_OMADRM_DerivMode = 2,                        /**< OMADRM_DerivMode */
+    TEE_DK_ISO18033_KDF1_DerivMode = 3,                 /**< ISO18033_KDF1_DerivMode */
+    TEE_DK_ISO18033_KDF2_DerivMode = 4,                 /**< ISO18033_KDF2_DerivMode */
+    TEE_DK_DerivFunc_NumOfModes,                        /**< num of modes */
+}tee_DK_DerivFuncMode;
+
+/**
+ * ingroup  TEE_COMMON_DATA
+ *
+ * TEEµÄÃÜÔ¿ÅÉÉúHASHÄ£Ê½¶¨Òå
+*/
+typedef enum
+{
+    TEE_DK_HASH_SHA1_mode = 0,              /**< HASH_SHA1 */
+    TEE_DK_HASH_SHA224_mode = 1,            /**< HASH_SHA224 */
+    TEE_DK_HASH_SHA256_mode = 2,            /**< HASH_SHA256 */
+    TEE_DK_HASH_SHA384_mode = 3,            /**< HASH_SHA384 */
+    TEE_DK_HASH_SHA512_mode = 4,            /**< HASH_SHA512 */
+    TEE_DK_HASH_NumOfModes,                 /**< num of modes */
+}tee_DK_HASH_Mode;
+#endif
+#endif
+
+

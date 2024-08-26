@@ -1,0 +1,773 @@
+ï»¿/*!
+ *****************************************************************************
+ *
+ * @File       tee_trusted_storage_api.h
+ * ---------------------------------------------------------------------------
+ *
+ * Copyright (c) Imagination Technologies Ltd.
+ * 
+ * The contents of this file are subject to the MIT license as set out below.
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a 
+ * copy of this software and associated documentation files (the "Software"), 
+ * to deal in the Software without restriction, including without limitation 
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+ * and/or sell copies of the Software, and to permit persons to whom the 
+ * Software is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in 
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
+ * THE SOFTWARE.
+ * 
+ * Alternatively, the contents of this file may be used under the terms of the 
+ * GNU General Public License Version 2 ("GPL")in which case the provisions of
+ * GPL are applicable instead of those above. 
+ * 
+ * If you wish to allow use of your version of this file only under the terms 
+ * of GPL, and not to allow others to use your version of this file under the 
+ * terms of the MIT license, indicate your decision by deleting the provisions 
+ * above and replace them with the notice and other provisions required by GPL 
+ * as set out in the file called "GPLHEADER" included in this distribution. If 
+ * you do not delete the provisions above, a recipient may use your version of 
+ * this file under the terms of either the MIT license or GPL.
+ * 
+ * This License is also included in this distribution in the file called 
+ * "MIT_COPYING".
+ *
+ *****************************************************************************/
+
+#ifndef __TEE_TRUSTED_STORAGE_API_H
+#define __TEE_TRUSTED_STORAGE_API_H
+
+#include "tee_internal_api.h"
+
+/**
+ * @ingroup TEE_TRUSTED_STORAGE_API
+ * HANDLE_NULLµÄ¶¨Òå£¬ÎÞÐ§object handle
+ */
+#define TEE_HANDLE_NULL 0x00000000
+
+
+typedef struct {
+    uint32_t objectEnumType;        /**< ¶ÔÏóÀàÐÍ  */
+
+} TEE_ObjectEnumInfo;
+
+typedef struct s_list_node
+{
+    struct s_list_node *pstPrev;
+    struct s_list_node *pstNext;
+} s_list;
+
+struct __TEE_ObjectEnumHandle {
+    //TEE_UUID uuid;
+    uint32_t storageID;
+    char ObjectID[64];
+    uint32_t objectEnumType;
+    s_list listhead;
+};
+typedef struct  __TEE_ObjectEnumHandle *TEE_ObjectEnumHandle;
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ *
+ * Êý¾ÝÁ÷¶¨Î»ÆðÊ¼Î»ÖÃÑ¡Ïî£¬ÓÃÓÚ#TEE_SeekObjectDataº¯Êý \n
+*/
+typedef enum
+{
+    TEE_DATA_SEEK_SET = 0,     /**< ¶¨Î»ÆðÊ¼Î»ÖÃÎªÊý¾ÝÁ÷¿ªÊ¼´¦ */
+    TEE_DATA_SEEK_CUR,         /**< ¶¨Î»ÆðÊ¼Î»ÖÃÎªµ±Ç°Êý¾ÝÁ÷Î»ÖÃ */
+    TEE_DATA_SEEK_END          /**< ¶¨Î»ÆðÊ¼Î»ÖÃÊý¾ÝÁ÷Ä©Î²´¦ */
+}TEE_Whence;
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ *
+ *  Storage ID£¬¶¨Òå¶ÔÓ¦appµÄ´æ´¢¿Õ¼ä \n
+*/
+enum Object_Storage_Constants{
+    TEE_OBJECT_STORAGE_PRIVATE = 0x00000001,     /**< ¶ÔÓ¦Ã¿¸öÓ¦ÓÃµ¥¶ÀµÄË½ÓÐµÄ´æ´¢¿Õ¼ä£¬Ä¿Ç°½öÖ§³ÖÕâÒ»ÖÖ */
+};
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ *
+ * #TEE_ObjectHandleµÄ#handleFlags£¬¾ö¶¨¸Ã#TEE_ObjectHandle¶ÔobjectÊý¾ÝÁ÷µÄ·ÃÎÊÈ¨ÏÞ \n
+*/
+enum Data_Flag_Constants{
+    TEE_DATA_FLAG_ACCESS_READ = 0x00000001,        /**< ¶ÔÊý¾ÝÁ÷ÓÐ¶ÁÈ¨ÏÞ£¬¿ÉÒÔ½øÐÐ¶Á²Ù×÷#TEE_ReadObjectData */
+    TEE_DATA_FLAG_ACCESS_WRITE = 0x00000002,       /**< ¶ÔÊý¾ÝÁ÷ÓÐÐ´È¨ÏÞ£¬¿ÉÒÔ½øÐÐÐ´²Ù×÷#TEE_WriteObjectDataºÍ²Ã¼ô²Ù×÷#TEE_TruncateObjectData */
+    TEE_DATA_FLAG_ACCESS_WRITE_META = 0x00000004,  /**< ¶ÔÊý¾ÝÁ÷ÓÐWRITE_METAÈ¨ÏÞ£¬¿ÉÒÔ½øÐÐÉ¾³ý#TEE_CloseAndDeletePersistentObjectºÍ¸ÄÃû²Ù×÷#TEE_RenamePersistentObject */
+    TEE_DATA_FLAG_SHARE_READ = 0x00000010,         /**< ¶ÔÊý¾ÝÁ÷ÓÐ¹²Ïí¶ÁÈ¨ÏÞ£¬¿ÉÒÔ´ò¿ª¶à¸ö#TEE_ObjectHandle²¢·¢¶ÁÈ¡ */
+    TEE_DATA_FLAG_SHARE_WRITE = 0x00000020,        /**< ¶ÔÊý¾ÝÁ÷ÓÐ¹²ÏíÐ´È¨ÏÞ£¬¿ÉÒÔ´ò¿ª¶à¸ö#TEE_ObjectHandle²¢·¢Ð´Èë */
+    TEE_DATA_FLAG_CREATE = 0x00000200,             /**< Î´Ê¹ÓÃ */
+    TEE_DATA_FLAG_EXCLUSIVE = 0x00000400,          /**< ±£»¤ÒÑÓÐÍ¬ÃûÊý¾ÝÎÄ¼þ¡£Èç¹ûÍ¬ÃûÎÄ¼þ²»´æÔÚ£¬ÔòÐÂ½¨Êý¾ÝÎÄ¼þ£»Èç¹ûÍ¬ÃûÎÄ¼þ´æÔÚÔò±¨´í */
+    TEE_DATA_FLAG_AES256 = 0x10000000,  /**< bit24Èç¹ûÎª1´ú±íAES256, Îª0´ú±íAES128 */
+};
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ *
+ * #TEE_ObjectHandle µÄ #keyUsage£¬¾ö¶¨¸Ãobject keyµÄÓÃ·¨ \n
+*/
+enum Usage_Constants{
+    TEE_USAGE_EXTRACTABLE = 0x00000001,    /**< objectµÄkey¿ÉÒÔÌáÈ¡ */
+    TEE_USAGE_ENCRYPT = 0x00000002,        /**< objectµÄkey¿ÉÒÔÓÃÓÚ¼ÓÃÜ */
+    TEE_USAGE_DECRYPT = 0x00000004,        /**< objectµÄkey¿ÉÒÔÓÃÓÚ½âÃÜ */
+    TEE_USAGE_MAC = 0x00000008,            /**< objectµÄkeyÓÃÓÚhash²Ù×÷ */
+    TEE_USAGE_SIGN = 0x00000010,           /**< objectµÄkeyÓÃÓÚÇ©Ãû²Ù×÷ */
+    TEE_USAGE_VERIFY = 0x00000020,         /**< objectµÄkeyÓÃÓÚÑéÖ¤²Ù×÷ */
+    TEE_USAGE_DERIVE = 0x00000040,         /**< objectµÄkeyÓÃÓÚ²úÉúkeyµÄ²Ù×÷ */
+    TEE_USAGE_DEFAULT = 0xFFFFFFFF,        /**< object³õÊ¼»¯Ê¹ÓÃ£¬Ä¬ÈÏ¸³¸øËùÓÐÈ¨ÏÞ */
+};
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ *
+ * #TEE_ObjectHandle µÄ#handleFlags£¬±íÃ÷¸ÃobjectµÄÒ»Ð©ÐÅÏ¢£¬ÊÇ·ñÊÇÓÀ¾Ãobject¡¢ÊÇ·ñ³õÊ¼»¯µÈµÈ \n
+*/
+enum Handle_Flag_Constants{
+    TEE_HANDLE_FLAG_PERSISTENT = 0x00010000,        /**< objectÎªÓÀ¾Ãobject */
+    TEE_HANDLE_FLAG_INITIALIZED = 0x00020000,       /**< objectÒÑ¾­³õÊ¼»¯ */
+    TEE_HANDLE_FLAG_KEY_SET = 0x00040000,           /**< Î´Ê¹ÓÃ */
+    TEE_HANDLE_FLAG_EXPECT_TWO_KEYS = 0x00080000,   /**< Î´Ê¹ÓÃ */
+};
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ *
+ * ÏµÍ³×ÊÔ´ÏÞÖÆ£¬ÈçÊý¾ÝÁ÷Î»ÖÃÖ¸Ê¾Æ÷¿ÉÈ¡×î´óÖµ  \n
+*/
+enum Miscellaneous_Constants{
+    TEE_DATA_MAX_POSITION = 0xFFFFFFFF,    /**< Êý¾ÝÁ÷µÄÎ»ÖÃÖ¸Ê¾Æ÷¿ÉÈ¡µÄ×î´ó×Ö½Ú³¤¶È */
+    TEE_OBJECT_ID_MAX_LEN = 64,            /**< objectIDµÄ×î´ó×Ö½Ú³¤¶È */
+};
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ *
+ * Êý¾ÝÁ÷¿ÉÒÔ´æ´¢Êý¾ÝµÄ×î´ó×Ö½ÚÊý \n
+*/
+enum TEE_DATA_Size{
+    TEE_DATA_OBJECT_MAX_SIZE = 0xFFFFFFFF     /**< objectÊý¾ÝÁ÷¿ÉÒÔ´æ´¢Êý¾ÝµÄ×î´ó×Ö½ÚÊý */
+};
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ *
+ * ÏµÍ³×ÊÔ´ÏÞÖÆ£¬ÈçÊý¾ÝÁ÷Î»ÖÃÖ¸Ê¾Æ÷¿ÉÈ¡×î´óÖµ  \n
+*/
+enum update_file_mode{
+    ADD_MODE = 0x0,    /**< add object and update file*/
+    DELETE_MODE = 0x1,            /**delete object and updata file */
+};
+
+TEE_Result tee_storage_init(TEE_UUID *uuid);
+TEE_Result tee_storage_exit();
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ * @brief »ñÈ¡objectÐÅÏ¢
+ *
+ * @par ÃèÊö:
+ * »ñÈ¡objectµÄ#TEE_ObjectInfo£¬½«Æä¿½±´µ½²ÎÊýobjectInfoÖ¸ÏòµÄ¿Õ¼ä£¬¸Ã¿Õ¼äÓÉÓÃ»§Ô¤·ÖÅä
+ *
+ * @attention ÎÞ
+ * @param object [IN]  »ñÈ¡#TEE_ObjectInfoµÄÔ´#TEE_ObjectHandle
+ * @param objectInfo [OUT]  Ö¸Ïò½á¹¹ÌåµÄÖ¸Õë£¬¸Ã½á¹¹ÌåÓÃÀ´´æ·ÅµÃµ½µÄ#TEE_ObjectInfo
+ *
+ * @retval ÎÞ
+ *
+ * @par ÒÀÀµ:
+ * @li Tee_trusted_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼þ¡£
+ * @since TrustedCore V100R002C00B302
+*/
+
+void TEE_GetObjectInfo(TEE_ObjectHandle object, TEE_ObjectInfo* objectInfo);
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ * @brief ÏÞÖÆobjectµÄ#objectUsageÎ»
+ *
+ * @par ÃèÊö:
+ * ÏÞÖÆobjectµÄ#objectUsageÎ»£¬¸ÃÎ»¾ö¶¨objectÖÐkeyµÄÓÃ·¨£¬È¡Öµ·¶Î§Îª#Usage_Constants£¬¶ÔÓÚ²ÎÊýobjectUsageµÄflagÎ»À´Ëµ: \n
+ *   Èç¹û¸ÃÎ»ÉèÖÃÎª1£¬Ôò²»»á¸Ä±äobjectµÄusage flag  \n
+ *   Èç¹û¸ÃÎ»ÉèÖÃÎª0£¬ÔòobjectÏàÓ¦µÄobject usage flagÇåÁã  \n
+ * ¼´ÓëÔ­À´µÄflagÎ»×öÓë²Ù×÷
+ *
+ * @attention ÐÂ½¨µÄobject»á°üº¬ËùÓÐ#Usage_Constants£¬ÇÒusage flagÖ»ÄÜ±»ÇåÁã£¬²»ÄÜ±»ÖÃÎ»
+ * @param object [IN]  ÐèÒªÏÞÖÆµÄ#TEE_ObjectHandle
+ * @param objectUsage [IN]  ÓÃ»§Ïë¸Ä±äµÄ#objectUsage
+ *
+ * @retval ÎÞ
+ *
+ * @par ÒÀÀµ:
+ * @li Tee_trusted_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼þ¡£
+ * @since TrustedCore V100R002C00B302
+*/
+
+void TEE_RestrictObjectUsage(TEE_ObjectHandle object, uint32_t objectUsage);
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ * @brief »ñÈ¡objectµÄattribute
+ *
+ * @par ÃèÊö:
+ * »ñÈ¡#TEE_ObjectHandleËùÖ¸ÏòobjectµÄ#TEE_Attribute½á¹¹ÌåÖÐunionµÄbufferÄÚÈÝ£¬ÇÒ¸Ãunion³ÉÔ±±ØÐëÎªref
+ *
+ * @attention #TEE_Attribute½á¹¹ÌåÖÐunionµÄ³ÉÔ±±ØÐëÎªref£¬²¢ÇÒÈç¹û¸Ã#TEE_AttributeÎªË½ÃÜµÄÐèÒª¸ÃobjectµÄ#Usage_Constants
+ * ±ØÐë°üÀ¨#TEE_USAGE_EXTRACTABLE
+ * @param object [IN]  »ñÈ¡#TEE_AttributeµÄÔ´#TEE_ObjectHandle
+ * @param attributeID [IN]  ÏëÒª»ñÈ¡#TEE_AttributeµÄID£¬ÀýÈç#TEE_ObjectAttribute£¬Ò²¿É×Ô¶¨Òå
+ * @param buffer [OUT]  Ö¸Õë£¬Ö¸ÏòµÄbufferÓÃÀ´´æ·Å»ñÈ¡µ½µÄbufferÖÐµÄÄÚÈÝ
+ * @param size [OUT]  Ö¸Õë£¬´æ·ÅÄÚÈÝ×Ö½Ú³¤¶È
+ *
+ * @retval #TEE_SUCCESS ±íÊ¾¸Ãº¯ÊýÖ´ÐÐ³É¹¦
+ * @retval #TEE_ERROR_ITEM_NOT_FOUND ÔÚobjectÖÐÃ»ÓÐ·¢ÏÖÒªÕÒµÄ#TEE_Attribute£¬»òÕß¸ÃobjectÎ´³õÊ¼»¯
+ * @retval #TEE_ERROR_SHORT_BUFFER Ìá¹©µÄbufferÌ«Ð¡£¬²»ÄÜÍêÈ«´æ·Å»ñÈ¡µ½µÄÄÚÈÝ
+ *
+ * @par ÒÀÀµ:
+ * @li Tee_trusted_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼þ¡£
+ * @since TrustedCore V100R002C00B302
+*/
+
+TEE_Result TEE_GetObjectBufferAttribute(TEE_ObjectHandle object, uint32_t attributeID, void* buffer, size_t* size);
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ * @brief »ñÈ¡objectµÄattribute
+ *
+ * @par ÃèÊö:
+ * »ñÈ¡#TEE_ObjectHandleËùÖ¸ÏòobjectµÄ#TEE_Attribute½á¹¹ÌåÖÐunionµÄvalue£¬ÇÒ¸Ãunion³ÉÔ±±ØÐëÎªvalue
+ *
+ * @attention #TEE_Attribute½á¹¹ÌåÖÐunionµÄ³ÉÔ±±ØÐëÎªvalue£¬²¢ÇÒÈç¹û¸Ã#TEE_AttributeÎªË½ÃÜµÄÐèÒª¸ÃobjectµÄ#Usage_Constants
+ * ±ØÐë°üÀ¨#TEE_USAGE_EXTRACTABLE
+ * @param object [IN]  »ñÈ¡#TEE_AttributeµÄÔ´#TEE_ObjectHandle
+ * @param attributeID [IN]  ÏëÒª»ñÈ¡#TEE_AttributeµÄID£¬ÀýÈç#TEE_ObjectAttribute£¬Ò²¿É×Ô¶¨Òå
+ * @param a [OUT]  Ö¸Õë£¬Ö¸ÏòµÄ¿Õ¼äÓÃÀ´´æ·Åvalue½á¹¹ÌåµÄa
+ * @param b [OUT]  Ö¸Õë£¬Ö¸ÏòµÄ¿Õ¼äÓÃÀ´´æ·Åvalue½á¹¹ÌåµÄb
+ *
+ * @retval #TEE_SUCCESS ±íÊ¾¸Ãº¯ÊýÖ´ÐÐ³É¹¦
+ * @retval #TEE_ERROR_ITEM_NOT_FOUND ÔÚobjectÖÐÃ»ÓÐ·¢ÏÖÒªÕÒµÄ#TEE_Attribute£¬»òÕß¸ÃobjectÎ´³õÊ¼»¯
+ * @retval #TEE_ERROR_ACCESS_DENIED ÊÔÍ¼»ñÈ¡Ò»¸öË½ÃÜµÄ#TEE_Attributeµ«Ã»ÓÐÖÃÎ»#TEE_USAGE_EXTRACTABLE
+ *
+ * @par ÒÀÀµ:
+ * @li Tee_trusted_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼þ¡£
+ * @since TrustedCore V100R002C00B302
+*/
+
+TEE_Result TEE_GetObjectValueAttribute(TEE_ObjectHandle object, uint32_t attributeID, uint32_t* a, uint32_t* b);
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ * @brief ¹Ø±Õ´ò¿ªµÄ#TEE_ObjectHandle
+ *
+ * @par ÃèÊö:
+ * ¹Ø±Õ´ò¿ªµÄ#TEE_ObjectHandle£¬¸Ãobject¿ÉÒÔÊÇÓÀ¾Ãobject»òÕßÁÙÊ±object
+ *
+ * @attention ÎÞ
+ * @param object [IN]  ÐèÒª¹Ø±ÕµÄ#TEE_ObjectHandle
+ *
+ * @retval ÎÞ
+ *
+ * @par ÒÀÀµ:
+ * @li Tee_trusted_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼þ¡£
+ * @since TrustedCore V100R002C00B302
+*/
+
+void TEE_CloseObject(TEE_ObjectHandle object);
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ * @brief ·ÖÅäÒ»¸öÎ´³õÊ¼»¯µÄobject
+ *
+ * @par ÃèÊö:
+ * ·ÖÅäÒ»¸öÎ´³õÊ¼»¯µÄobject£¬ÓÃÀ´´æ·Åkey£¬ÆäÖÐ#objectTypeºÍ#maxObjectSize±ØÐëÖ¸¶¨£¬ÒÔÔ¤·ÖÅä×ÊÔ´
+ *
+ * @attention ÎÞ
+ * @param objectType [IN]  ´ý´´½¨µÄobjectµÄÀàÐÍ£¬È¡Öµ¿ÉÒÔÎª#TEE_ObjectType
+ * @param maxObjectSize [IN]  objectµÄ×î´ó×Ö½ÚÊý
+ * @param object [OUT]  Ö¸Õë£¬Ö¸ÏòÐÂ´´½¨µÄobjectµÄhandle
+ *
+ * @retval #TEE_SUCCESS ±íÊ¾¸Ãº¯ÊýÖ´ÐÐ³É¹¦
+ * @retval #TEE_ERROR_OUT_OF_MEMORY Ã»ÓÐ×ã¹»µÄ×ÊÔ´È¥·ÖÅä
+ * @retval #TEE_ERROR_NOT_SUPPORTED ¸ÃobjectÌá¹©µÄ×Ö½ÚÊý²»±»Ö§³Ö
+ *
+ * @par ÒÀÀµ:
+ * @li Tee_trusted_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼þ¡£
+ * @since TrustedCore V100R002C00B302
+*/
+TEE_Result TEE_AllocateTransientObject(uint32_t objectType, uint32_t maxObjectSize, TEE_ObjectHandle* object);
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ * @brief ÊÍ·ÅÒ»¸öÒÑ·ÖÅä×ÊÔ´µÄÁÙÊ±object
+ *
+ * @par ÃèÊö:
+ * ÊÍ·ÅÒ»¸öÒÑ·ÖÅä×ÊÔ´µÄÁÙÊ±object£¬º¯Êýµ÷ÓÃºó¸ÃhandleÊ§Ð§£¬²¢ÊÍ·ÅËùÓÐ·ÖÅäµÄ×ÊÔ´£¬Óë#TEE_AllocateTransientObjectÅä¶ÔÊ¹ÓÃ
+ *
+ * @attention ÎÞ
+ * @param object [IN]  ÐèÒªÊÍ·ÅµÄ#TEE_ObjectHandle
+ *
+ * @retval ÎÞ
+ *
+ * @par ÒÀÀµ:
+ * @li Tee_trusted_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼þ¡£
+ * @since TrustedCore V100R002C00B302
+*/
+
+void TEE_FreeTransientObject(TEE_ObjectHandle object);
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ * @brief ÖØÖÃtransient object
+ *
+ * @par ÃèÊö:
+ * ÖØÖÃÁÙÊ±objectµ½ËüµÄ³õÊ¼×´Ì¬£¬¼´¸ÕallocateÖ®ºóµÄ×´Ì¬:ÒÑ·ÖÅä×ÊÔ´µ«Ã»ÓÐ´æÈëkeyµÄÎ´³õÊ¼»¯object£¬¿ÉÒÔÖØÐÂÓÃÀ´´æÈëkey
+ *
+ * @attention ÎÞ
+ * @param object [IN]  ÐèÒªÖØÖÃµÄ#TEE_ObjectHandle
+ *
+ * @retval ÎÞ
+ *
+ * @par ÒÀÀµ:
+ * @li Tee_trusted_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼þ¡£
+ * @since TrustedCore V100R002C00B302
+*/
+
+void TEE_ResetTransientObject(TEE_ObjectHandle object);
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ * @brief ¸øÒ»¸öÎ´³õÊ¼»¯µÄÁÙÊ±object¸³attribute
+ *
+ * @par ÃèÊö:
+ * ¸Ãº¯Êý½«²ÎÊýattrsÖÐµÄattributes¸³¸øÒ»¸öÎ´³õÊ¼»¯µÄÁÙÊ±object£¬²ÎÊýattrsÓÉ¿ÉÐÅÓ¦ÓÃ(Trusted APP)Ìá¹©
+ *
+ * @attention ÎÞ
+ * @param object [IN/OUT]  ÒÑ´´½¨µ«Î´³õÊ¼»¯µÄ#TEE_ObjectHandle
+ * @param attrs [IN]  object attributeÊý×é£¬¿ÉÒÔÎªÒ»¸ö»òÕß¶à¸ö#TEE_Attribute
+ * @param attrCount [IN]  Êý×é³ÉÔ±¸öÊý
+ *
+ * @retval #TEE_SUCCESS ±íÊ¾¸Ãº¯ÊýÖ´ÐÐ³É¹¦
+ * @retval #TEE_ERROR_BAD_PARAMETERS attribute²»ÕýÈ·»òÕß²»Ò»ÖÂ£¬´ËÊ±±ØÐë±£Ö¤objectÈÔÈ»Î´³õÊ¼»¯
+ *
+ * @par ÒÀÀµ:
+ * @li Tee_trusted_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼þ¡£
+ * @since TrustedCore V100R002C00B302
+*/
+TEE_Result TEE_PopulateTransientObject(TEE_ObjectHandle object, TEE_Attribute* attrs, uint32_t attrCount);
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ * @brief ³õÊ¼»¯Ò»¸öbufferÀàÐÍµÄ#TEE_Attribute
+ *
+ * @par ÃèÊö:
+ * ³õÊ¼»¯Ò»¸öbufferÀàÐÍµÄ#TEE_Attribute£¬¼´#TEE_Attribute½á¹¹ÌåÖÐunionµÄ³ÉÔ±±ØÐëÎªref
+ *
+ * @attention ÎÞ
+ * @param attr [OUT]  ÐèÒª³õÊ¼»¯µÄ#TEE_Attribute
+ * @param attributeID [IN]  ¸³¸ø#TEE_AttributeµÄID
+ * @param buffer [IN]  ¸Ãbuffer´æ·ÅÒª¸³ÖµµÄÄÚÈÝ
+ * @param length [IN]  ¸³ÖµÄÚÈÝµÄ×Ö½Ú³¤¶È
+ *
+ * @retval ÎÞ
+ *
+ * @par ÒÀÀµ:
+ * @li Tee_trusted_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼þ¡£
+ * @since TrustedCore V100R002C00B302
+*/
+void TEE_InitRefAttribute(TEE_Attribute* attr,uint32_t attributeID,void* buffer,size_t length);
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ * @brief ³õÊ¼»¯Ò»¸övalueÀàÐÍµÄ#TEE_Attribute£¬¼´#TEE_Attribute½á¹¹ÌåÖÐunionµÄ³ÉÔ±±ØÐëÎªvalue
+ *
+ * @par ÃèÊö:
+ * ³õÊ¼»¯Ò»¸övalueÀàÐÍµÄ#TEE_Attribute
+ *
+ * @attention ÎÞ
+ * @param attr [OUT]  ÐèÒª³õÊ¼»¯µÄ#TEE_Attribute
+ * @param attributeID [IN]  ¸³¸ø#TEE_Attribute µÄID
+ * @param a [IN]  ¸³Öµ¸ø#TEE_Attribute½á¹¹ÌåÖÐunionµÄ³ÉÔ±value bµÄÖµ
+ * @param b [IN]  ¸³Öµ¸ø#TEE_Attribute½á¹¹ÌåÖÐunionµÄ³ÉÔ±value aµÄÖµ
+ *
+ * @retval ÎÞ
+ *
+ * @par ÒÀÀµ:
+ * @li Tee_trusted_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼þ¡£
+ * @since TrustedCore V100R002C00B302
+*/
+
+void TEE_InitValueAttribute(TEE_Attribute* attr,uint32_t attributeID,uint32_t a, uint32_t b);
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ * @brief ÓÃÒ»¸ö³õÊ¼»¯µÄobject¸øÎ´³õÊ¼»¯µÄobject¸³Öµ#TEE_Attribute
+ *
+ * @par ÃèÊö:
+ * ¸Ãº¯ÊýÓÃÒ»¸ö³õÊ¼»¯µÄobject¸øÒ»¸öÎ´³õÊ¼»¯µÄobject¸³Öµ#TEE_Attribute£¬Ïàµ±ÓÚ°ÑsrcobjectµÄ#TEE_Attribute¿½±´µ½destobjectÖÐ
+ *
+ * @attention Á½¸öobjectµÄ#TEE_Attribute ÀàÐÍ¡¢¸öÊý±ØÐëÆ¥Åä
+ * @param destObject [IN]  Î´³õÊ¼»¯ÐèÒª¸³ÖµµÄ#TEE_ObjectHandle
+ * @param srcObject [IN]  ÒÑ³õÊ¼»¯ÓÃÀ´¸øÁíÒ»¸öobject¸³ÖµµÄ#TEE_ObjectHandle
+ *
+ * @retval ÎÞ
+ *
+ * @par ÒÀÀµ:
+ * @li Tee_trusted_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼þ¡£
+ * @since TrustedCore V100R002C00B302
+*/
+
+void TEE_CopyObjectAttributes(TEE_ObjectHandle destObject,TEE_ObjectHandle srcObject);
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ * @brief ²úÉúËæ»úkey»òÕßkey-pair
+ *
+ * @par ÃèÊö:
+ * ¸Ãº¯Êý²úÉúËæ»úkey»òÕßkey-pair£¬²¢¸³Öµ¸øÁÙÊ±object
+ *
+ * @attention ÎÞ
+ * @param object [IN]  ÁÙÊ±object£¬ÓÃÀ´´æ·Å²úÉúµÄkey
+ * @param keySize [IN]  ÒªÇóµÄkeyµÄ×Ö½Ú´óÐ¡
+ * @param params [IN]  ²úÉúkeyÐèÒªµÄ²ÎÊý
+ * @param paramCount [IN]  ²úÉúkeyÐèÒªµÄ²ÎÊý¸öÊý
+ *
+ * @retval #TEE_SUCCESS ±íÊ¾¸Ãº¯ÊýÖ´ÐÐ³É¹¦
+ * @retval #TEE_ERROR_BAD_PARAMETERS: #²úÉúµÄkeyºÍÁÙÊ±objectËùÄÜ´æ·ÅµÄkeyÀàÐÍ²»Ò»ÖÂ
+ *
+ * @par ÒÀÀµ:
+ * @li Tee_trusted_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼þ¡£
+ * @since TrustedCore V100R002C00B302
+*/
+TEE_Result TEE_GenerateKey(TEE_ObjectHandle object,uint32_t keySize,TEE_Attribute* params,uint32_t paramCount);
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ * @brief ´´½¨Ò»¸öÐÂµÄÓÀ¾Ãobject
+ *
+ * @par ÃèÊö:
+ * ´´½¨Ò»¸öÐÂµÄÓÀ¾Ãobject£¬¿ÉÒÔÖ±½Ó³õÊ¼»¯Êý¾ÝÁ÷ºÍ#TEE_Attribute£¬ÓÃ»§¿ÉÒÔÓÃ·µ»ØµÄhandleÀ´·ÃÎÊobjectµÄ#TEE_AttributeºÍÊý¾ÝÁ÷
+ *
+ * @attention ÎÞ
+ * @param storageID [IN]   ¶ÔÓ¦Ã¿¸öÓ¦ÓÃµ¥¶ÀµÄ´æ´¢¿Õ¼ä£¬È¡ÖµÎª#Object_Storage_Constants£¬Ä¿Ç°½öÖ§³Ö#TEE_STORAGE_PRIVATE.
+ * @param objectID [IN]  object  identifier£¬¼´Òª´´½¨µÄobjectµÄÃû×Ö
+ * @param objectIDLen [IN]  object  identifier µÄ×Ö½Ú³¤¶È
+ * @param flags [IN]  object´´½¨ºóµÄflags£¬È¡Öµ¿ÉÒÔÎª#Data_Flag_Constants »ò #Handle_Flag_ConstantsÖÐµÄÒ»¸ö»ò¶à¸ö
+ * @param attributes [IN]  ÁÙÊ±objectµÄ#TEE_ObjectHandle£¬ÓÃÀ´³õÊ¼»¯objectµÄ#TEE_Attribute£¬¿ÉÒÔÎª#TEE_HANDLE_NULL
+ * @param initialData [IN]  ³õÊ¼Êý¾Ý£¬ÓÃÀ´³õÊ¼»¯Êý¾ÝÁ÷Êý¾Ý
+ * @param initialDataLen [IN] initialData ³õÊ¼Êý¾ÝµÄ×Ö½Ú³¤¶È
+ * @param object [OUT]  º¯Êý³É¹¦Ö´ÐÐºó·µ»ØµÄ#TEE_ObjectHandle
+ *
+ * @retval #TEE_SUCCESS ±íÊ¾¸Ãº¯ÊýÖ´ÐÐ³É¹¦
+ * @retval #TEE_ERROR_ITEM_NOT_FOUND:   ¸ÃstorageID ²»´æÔÚ»òÕß²»ÄÜÕÒµ½object identifier
+ * @retval #TEE_ERROR_ACCESS_CONFLICT ·ÃÎÊÈ¨ÏÞ³åÍ»
+ * @retval #TEE_ERROR_OUT_OF_MEMORY Ã»ÓÐ×ã¹»µÄ×ÊÔ´À´Íê³É²Ù×÷
+ * @retval #TEE_ERROR_STORAGE_NO_SPACE Ã»ÓÐ×ã¹»µÄ¿Õ¼äÀ´´´½¨object
+ *
+ * @par ÒÀÀµ:
+ * @li Tee_trusted_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼þ¡£
+ * @since TrustedCore V100R002C00B302
+*/
+TEE_Result TEE_CreatePersistentObject(uint32_t storageID, void* ojbectID, size_t objectIDLen, uint32_t flags, TEE_ObjectHandle attributes, void* initialData, size_t initialDataLen, TEE_ObjectHandle* object);
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ * @brief ´ò¿ªÒ»¸öÒÑ´æÔÚµÄÓÀ¾Ãobject
+ *
+ * @par ÃèÊö:
+ * ´ò¿ªÒ»¸öÒÑ´æÔÚµÄÓÀ¾Ãobject£¬·µ»ØµÄhandleÓÃ»§¿ÉÒÔÓÃÀ´·ÃÎÊobjectµÄ#TEE_AttributeºÍÊý¾ÝÁ÷
+ *
+ * @attention ÎÞ
+ * @param storageID [IN]   ¶ÔÓ¦Ã¿¸öÓ¦ÓÃµ¥¶ÀµÄ´æ´¢¿Õ¼ä£¬È¡ÖµÎª#Object_Storage_Constants£¬Ä¿Ç°½öÖ§³Ö#TEE_STORAGE_PRIVATE
+ * @param objectID [IN]  object  identifier£¬¼´Òª´ò¿ªµÄobjectµÄÃû×Ö
+ * @param objectIDLen [IN]  object  identifier µÄ×Ö½Ú³¤¶È
+ * @param flags [IN]  object´ò¿ªºóµÄflags£¬È¡Öµ¿ÉÒÔÎª#Data_Flag_Constants »ò #Handle_Flag_ConstantsÖÐµÄÒ»¸ö»ò¶à¸ö
+ * @param object [OUT]  º¯Êý³É¹¦Ö´ÐÐºó·µ»ØµÄ#TEE_ObjectHandle
+ *
+ * @retval #TEE_SUCCESS ±íÊ¾¸Ãº¯ÊýÖ´ÐÐ³É¹¦
+ * @retval #TEE_ERROR_ITEM_NOT_FOUND:   storageID ²»´æÔÚ»òÕß²»ÄÜÕÒµ½object identifier
+ * @retval #TEE_ERROR_ACCESS_CONFLICT ·ÃÎÊÈ¨ÏÞ³åÍ»
+ * @retval #TEE_ERROR_OUT_OF_MEMORY Ã»ÓÐ×ã¹»µÄ×ÊÔ´À´Íê³É²Ù×÷
+ *
+ * @par ÒÀÀµ:
+ * @li Tee_trusted_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼þ¡£
+ * @since TrustedCore V100R002C00B302
+*/
+TEE_Result TEE_OpenPersistentObject(uint32_t storageID, void* ojbectID, size_t objectIDLen, uint32_t flags, TEE_ObjectHandle* object);
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ * @brief ´ÓobjectµÄÊý¾ÝÁ÷¶ÁÈ¡Êý¾Ý£¬object±ØÐëÎªÓÀ¾Ãobject
+ *
+ * @par ÃèÊö:
+ * ¸Ãº¯Êý´ÓobjectµÄÊý¾ÝÁ÷¶ÁÈ¡size×Ö½ÚÊý¾Ýµ½bufferÖ¸ÕëÖ¸¶¨µÄbuffer,¸Ã#TEE_ObjectHandle±ØÐëÒÑ¾­ÓÃ#TEE_DATA_FLAG_ACCESS_READÈ¨ÏÞ´ò¿ª
+ *
+ * @attention ÎÞ
+ * @param objbect [IN]   Òª¶ÁÈ¡µÄÔ´#TEE_ObjectHandle
+ * @param buffer [OUT]  ´æ·Å¶ÁÈ¡Êý¾Ý
+ * @param size [IN]  Òª¶ÁÈ¡µÄÊý¾Ý×Ö½ÚÊý
+ * @param count [OUT]  Êµ¼Ê¶ÁÈ¡µ½µÄÊý¾Ý×Ö½ÚÊý
+ *
+ * @retval #TEE_SUCCESS ±íÊ¾¸Ãº¯ÊýÖ´ÐÐ³É¹¦£¬Ä¿Ç°½ö·µ»Ø³É¹¦£¬ÆäËü´íÎó·µ»ØÖµ½«ÔÚºóÐø°æ±¾ÊµÏÖ
+ *
+ * @par ÒÀÀµ:
+ * @li Tee_trusted_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼þ¡£
+ * @since TrustedCore V100R002C00B302
+*/
+TEE_Result TEE_ReadObjectData(TEE_ObjectHandle ojbect,void* buffer,size_t size,uint32_t* count);
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ * @brief ÍùobjectµÄÊý¾ÝÁ÷Ð´ÈëÊý¾Ý£¬object±ØÐëÎªÓÀ¾Ãobject
+ *
+ * @par ÃèÊö:
+ * ¸Ãº¯Êý´ÓbufferÍùobjectµÄÊý¾ÝÁ÷Ð´Èësize×Ö½ÚµÄÊý¾Ý,#TEE_ObjectHandle±ØÐëÒÑÓÃ#TEE_DATA_FLAG_ACCESS_WRITEÈ¨ÏÞ´ò¿ª
+ *
+ * @attention ÎÞ
+ * @param ojbect [IN]   ÒªÐ´ÈëµÄÄ¿±ê#TEE_ObjectHandle
+ * @param buffer [IN]  ´æ·ÅÒªÐ´ÈëµÄÔ´Êý¾Ý
+ * @param size [IN]  ÒªÐ´ÈëµÄÊý¾Ý×Ö½ÚÊý
+ *
+ * @retval #TEE_SUCCESS ±íÊ¾¸Ãº¯ÊýÖ´ÐÐ³É¹¦
+ *
+ * @par ÒÀÀµ:
+ * @li Tee_trusted_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼þ¡£
+ * @since TrustedCore V100R002C00B302
+*/
+TEE_Result TEE_WriteObjectData(TEE_ObjectHandle ojbect,void* buffer,size_t size);
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ * @brief ¸Ä±äobjectµÄÊý¾ÝÁ÷´óÐ¡£¬object±ØÐëÎªÓÀ¾Ãobject
+ *
+ * @par ÃèÊö:
+ * ¸Ãº¯Êý¸Ä±äÊý¾ÝÁ÷×Ö½Ú´óÐ¡¡£Èç¹ûsizeÐ¡ÓÚµ±Ç°Êý¾ÝÁ÷µÄsizeÔòÉ¾³ýËùÓÐ³¬³öµÄ×Ö½Ú¡£Èç¹ûsize´óÓÚµ±Ç°Êý¾ÝÁ÷µÄsizeÔòÓÃ'0'À©Õ¹
+ * #TEE_ObjectHandle±ØÐëÓÃ#TEE_DATA_FLAG_ACCESS_WRITEÈ¨ÏÞ´ò¿ª
+ *
+ * @attention ÎÞ
+ * @param object [IN]   ÒªÐÞ¸ÄµÄ#TEE_ObjectHandle
+ * @param size [IN]  Êý¾ÝÁ÷µÄÐÂµÄÊý¾Ý´óÐ¡
+ *
+ * @retval #TEE_SUCCESS ±íÊ¾¸Ãº¯ÊýÖ´ÐÐ³É¹¦
+ * @retval #TEE_ERROR_STORAGE_NO_SPACE Ã»ÓÐ×ã¹»µÄ¿Õ¼äÀ´Ö´ÐÐ²Ù×÷
+ *
+ * @par ÒÀÀµ:
+ * @li Tee_trusted_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼þ¡£
+ * @since TrustedCore V100R002C00B302
+*/
+
+TEE_Result TEE_TruncateObjectData(TEE_ObjectHandle object, uint32_t size );
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ * @brief ÉèÖÃobjectµÄÊý¾ÝÁ÷Î»ÖÃÖ¸Ê¾Æ÷£¬object±ØÐëÎªÓÀ¾Ãobject
+ *
+ * @par ÃèÊö:
+ * ¸Ãº¯ÊýÉèÖÃ#TEE_ObjectHandleËùÖ¸ÏòµÄÊý¾ÝÁ÷Î»ÖÃ£¬½«Êý¾ÝÁ÷Î»ÖÃÉèÖÃÎª:Æ«ÒÆµÄÆðÊ¼Î»ÖÃ+offset \n
+ * ²ÎÊýwhence¿ØÖÆÆ«ÒÆµÄÆðÊ¼Î»ÖÃ£¬È¡Öµ¿ÉÒÔÎª#TEE_Whence£¬º¬ÒåÈçÏÂ£º\n
+ *	   #TEE_DATA_SEEK_SET£¬Êý¾ÝÁ÷Æ«ÒÆµÄÆðÊ¼Î»ÖÃÎªÎÄ¼þÍ·£¬¼´0´¦  \n
+ *	   #TEE_DATA_SEEK_CUR£¬Êý¾ÝÁ÷Æ«ÒÆµÄÆðÊ¼Î»ÖÃÎªµ±Ç°Î»ÖÃ£¬¼´ÔÚµ±Ç°Î»ÖÃµÄ»ù´¡ÉÏÆ«ÒÆoffset  \n
+ *	   #TEE_DATA_SEEK_END£¬Êý¾ÝÁ÷Æ«ÒÆµÄÆðÊ¼Î»ÖÃÎªÎÄ¼þÄ©Î²  \n
+ * ²ÎÊýoffsetÎªÕýÊýÊ±ÏòºóÆ«ÒÆ£¬¼´ÏòÎÄ¼þÎ²²¿·½Ïò£¬¸ºÊýÊ±ÏòÇ°Æ«ÒÆ£¬¼´ÎÄ¼þÍ·²¿·½Ïò
+ *
+ * @attention ÎÞ
+ * @param object [IN]   ÒªÉèÖÃµÄ#TEE_ObjectHandle
+ * @param offset [IN]  Êý¾ÝÁ÷Î»ÖÃÒÆ¶¯µÄ×Ö½ÚÊý
+ * @param whence [IN]  ¼ÆËãÊý¾ÝÁ÷Æ«ÒÆµÄ³õÊ¼Î»ÖÃ
+ *
+ * @retval #TEE_SUCCESS ±íÊ¾¸Ãº¯ÊýÖ´ÐÐ³É¹¦
+ * @retval #TEE_ERROR_OVERFLOW ²Ù×÷Ê¹Î»ÖÃÖ¸Ê¾Æ÷µÄÖµ³¬¹ýÁËÆäÏµÍ³ÏÞÖÆ#TEE_DATA_MAX_POSITION
+ *
+ * @par ÒÀÀµ:
+ * @li Tee_trusted_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼þ¡£
+ * @since TrustedCore V100R002C00B302
+*/
+
+TEE_Result TEE_SeekObjectData(TEE_ObjectHandle object, int32_t offset, TEE_Whence whence);
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ * @brief ¹Ø±Õ´ò¿ªµÄ#TEE_ObjectHandle£¬²¢É¾³ýobject
+ *
+ * @par ÃèÊö:
+ * ¹Ø±Õ´ò¿ªµÄ#TEE_ObjectHandle£¬²¢É¾³ýobject£¬object±ØÐëÎªÓÀ¾ÃobjectÇÒ±ØÐëÒÑÓÃ#TEE_DATA_FLAG_ACCESS_WRITE_METAÈ¨ÏÞ´ò¿ª
+ *
+ * @attention ÎÞ
+ * @param object [IN]  ÐèÒª¹Ø±Õ²¢É¾³ýµÄ#TEE_ObjectHandle
+ *
+ * @retval ÎÞ
+ *
+ * @par ÒÀÀµ:
+ * @li Tee_trusted_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼þ¡£
+ * @since TrustedCore V100R002C00B302
+ */
+
+void TEE_CloseAndDeletePersistentObject(TEE_ObjectHandle object);
+
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ * @brief »ñÈ¡object  µÄÐÅÏ¢: Êý¾Ý²¿·Ö³¤¶ÈºÍÊý¾ÝÁ÷µÄµ±Ç°Î»ÖÃ
+ *
+ * @par ÃèÊö:
+ * »ñÈ¡objectÊý¾Ý²¿·ÖµÄÐÅÏ¢£¬Êý¾Ý²¿·ÖµÄ×Ü³¤¶ÈºÍÊý¾ÝÁ÷µ±Ç°µÄÎ»ÖÃ
+ *
+ * @attention ÎÞ
+ *  *@param object [IN]   ÒªÉèÖÃµÄ#TEE_ObjectHandle
+ * @param pos [out]  Êý¾ÝÁ÷Î»ÖÃ
+ * @param len [IN]  Êý¾ÝÁ÷³¤¶È
+ *
+ * @retval ÎÞ
+ *
+ * @par ÒÀÀµ:
+ * @li Tee_trusted_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼þ¡£
+ * @since TrustedCore V100R002C00B302
+ */
+
+TEE_Result TEE_InfoObjectData(TEE_ObjectHandle object, uint32_t * pos, uint32_t * len);
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ * @brief Í¬²½´ò¿ªµÄ#TEE_ObjectHandleµ½´ÅÅÌ
+ *
+ * @par ÃèÊö:
+ * Í¬²½´ò¿ªµÄ#TEE_ObjectHandle£¬²¢Í¬²½¶ÔÓ¦µÄ°²È«ÊôÐÔÎÄ¼þ(4¸ö)µ½´ÅÅÌ
+ *
+ * @attention ÎÞ
+ * @param object [IN]  ÐèÒªÍ¬²½µÄ#TEE_ObjectHandle
+ *
+ * @retval #TEE_SUCCESS ±íÊ¾¸Ãº¯ÊýÖ´ÐÐ³É¹¦
+ *
+ * @par ÒÀÀµ:
+ * @li Tee_trusted_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼þ¡£
+ * @since TrustedCore V100R002C00B302
+ */
+
+TEE_Result TEE_SyncPersistentObject(TEE_ObjectHandle object);
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ * @brief ¸Ä±äobject identifier£¬¼´¸Ä±äobjectµÄÃû×Ö
+ *
+ * @par ÃèÊö:
+ * ¸Ä±äobject identifier£¬¸Ã#TEE_ObjectHandle±ØÐëÓÃ#TEE_DATA_FLAG_ACCESS_WRITE_METAÈ¨ÏÞ´ò¿ª
+ *
+ * @attention ÎÞ
+ * @param ojbect [IN/OUT]   ÒªÐÞ¸ÄµÄobject handle
+ * @param newObjectID [IN]  ÐÂµÄobject identifier
+ * @param newObjectIDLen [IN]  ÐÂµÄobject identifier³¤¶È
+ *
+ * @retval #TEE_SUCCESS ±íÊ¾¸Ãº¯ÊýÖ´ÐÐ³É¹¦
+ *
+ * @par ÒÀÀµ:
+ * @li Tee_trusted_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼þ¡£
+ * @since TrustedCore V100R002C00B302
+ */
+TEE_Result TEE_RenamePersistentObject(TEE_ObjectHandle  object, void* newObjectID, size_t newObjectIDLen);
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ * @brief ·ÖÅäÒ»¸öÎ´³õÊ¼»¯µÄobject enumerator µÄhandle
+ *
+ * @par ÃèÊö:
+ * ·ÖÅäÒ»¸öÎ´³õÊ¼»¯µÄobject enumeratorµÄhandle
+ *
+ * @attention ÎÞ
+ * @param object [OUT]  Ö¸Õë£¬Ö¸ÏòÐÂ´´½¨µÄobject enumerator µÄ handle
+ *
+ * @retval #TEE_SUCCESS ±íÊ¾¸Ãº¯ÊýÖ´ÐÐ³É¹¦
+ * @retval #TEE_ERROR_OUT_OF_MEMORY Ã»ÓÐ×ã¹»µÄ×ÊÔ´È¥·ÖÅä
+ *
+ * @par ÒÀÀµ:
+ * @li Tee_trusted_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼þ¡£
+ * @since TrustedCore V100R002C00B302
+ */
+TEE_Result TEE_AllocatePersistentObjectEnumerator(TEE_ObjectEnumHandle* objectEnumerator );
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ * @brief ÊÍ·ÅÒ»¸öÒÑ·ÖÅä×ÊÔ´µÄobject enumerator handle
+ *
+ * @par ÃèÊö:
+ * ÊÍ·ÅÒ»¸öÒÑ·ÖÅä×ÊÔ´µÄÁÙÊ±object enumerator handle£¬º¯Êýµ÷ÓÃºó¸ÃhandleÊ§Ð§£¬²¢ÊÍ·ÅËùÓÐ·ÖÅäµÄ×ÊÔ´£¬Óë#TEE_AllocatePersistentObjectEnumeratorÅä¶ÔÊ¹ÓÃ
+ *
+ * @attention ÎÞ
+ * @param object [IN]  ÐèÒªÊÍ·ÅµÄ#TEE_ObjectEnumHandle
+ *
+ * @retval ÎÞ
+ *
+ * @par ÒÀÀµ:
+ * @li Tee_trusted_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼þ¡£
+ * @since TrustedCore V100R002C00B302
+ */
+void TEE_FreePersistentObjectEnumerator(TEE_ObjectEnumHandle objectEnumerator );
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ * @brief ÖØÖÃobject enumerator
+ *
+ * @par ÃèÊö:
+ * ÖØÖÃÁÙÊ±object enumerator µ½ËüµÄ³õÊ¼×´Ì¬£¬¼´¸ÕallocateÖ®ºóµÄ×´Ì¬
+ *
+ * @attention ÎÞ
+ * @param object [IN]  ÐèÒªÖØÖÃµÄobject enumerator µÄ#TEE_ObjectEnumHandle
+ *
+ * @retval ÎÞ
+ *
+ * @par ÒÀÀµ:
+ * @li Tee_trusted_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼þ¡£
+ * @since TrustedCore V100R002C00B302
+ */
+void TEE_ResetPersistentObjectEnumerator(TEE_ObjectEnumHandle objectEnumerator );
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ * @brief ³õÊ¼»¯object enumerator£¬¿ªÊ¼ÁÐ¾Ù¸ø¶¨´æ´¢¿Õ¼äµÄËùÓÐobject£¬objectµÄÐÅÏ¢¿ÉÒÔÍ¨¹ý#TEE_GetNextPersistentObjectº¯Êý»ñÈ¡
+ *
+ * @par ÃèÊö:
+ * ¿ªÊ¼ÁÐ¾Ù¸ø¶¨´æ´¢¿Õ¼äµÄËùÓÐobject£¬objectµÄÐÅÏ¢¿ÉÒÔÍ¨¹ý#TEE_GetNextPersistentObjectº¯Êý»ñÈ¡
+ *
+ * @attention ÎÞ
+ * @param object [IN]  ÒÑ·ÖÅäºÃµÄobject enumerator µÄ#TEE_ObjectEnumHandle
+ * @param storageID [IN]   ¶ÔÓ¦Ã¿¸öÓ¦ÓÃµ¥¶ÀµÄ´æ´¢¿Õ¼ä£¬È¡ÖµÎª#Object_Storage_Constants£¬Ä¿Ç°½öÖ§³Ö#TEE_STORAGE_PRIVATE
+ *
+ * @retval #TEE_SUCCESS ±íÊ¾¸Ãº¯ÊýÖ´ÐÐ³É¹¦
+ * @retval #TEE_ITEM_NOT_FOUND storageID²»ÊÇ#TEE_STORAGE_PRIVATE»òÕßÔÚ#TEE_STORAGE_PRIVATE´æ´¢¿Õ¼äÄÚÃ»ÓÐobject
+ *
+ * @par ÒÀÀµ:
+ * @li Tee_trusted_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼þ¡£
+ * @since TrustedCore V100R002C00B302
+ */
+TEE_Result TEE_StartPersistentObjectEnumerator(TEE_ObjectEnumHandle objectEnumerator,  uint32_t   storageID);
+
+/**
+ * @ingroup  TEE_TRUSTED_STORAGE_API
+ * @brief »ñÈ¡object enumeratorÖÐµÄÏÂÒ»¸öobject£¬²¢·µ»ØobjectµÄ#TEE_ObjectInfo, objectID , objectIDLen
+ *
+ * @par ÃèÊö:
+ *  »ñÈ¡object enumeratorÖÐµÄÏÂÒ»¸öobject£¬²¢·µ»ØobjectµÄ#TEE_ObjectInfo, objectID , objectIDLenÐÅÏ¢
+ *
+ * @attention ÎÞ
+ * @param object [IN]  ÒÑ³õÊ¼»¯ºÃµÄobject enumerator µÄ#TEE_ObjectEnumHandle
+ * @param objectInfo [OUT]  Ö¸Ïò½á¹¹ÌåµÄÖ¸Õë£¬¸Ã½á¹¹ÌåÓÃÀ´´æ·ÅµÃµ½µÄ#TEE_ObjectInfo
+ * @param objectInfo [OUT]  Ö¸ÏòÒ»¶ÎbufferµÄÖ¸Õë£¬ÓÃÀ´´æ·ÅµÃµ½µÄobjectID
+ * @param objectInfo [OUT]  ÓÃÀ´´æ·ÅµÃµ½µÄobjectIDLen
+ *
+ * @retval #TEE_SUCCESS ±íÊ¾¸Ãº¯ÊýÖ´ÐÐ³É¹¦
+ * @retval #TEE_ITEM_NOT_FOUND enumeratorÒÑ¾­Ã»ÓÐobject»òÕßenumeratorÃ»ÓÐ±»³õÊ¼»¯
+ *
+ * @par ÒÀÀµ:
+ * @li Tee_trusted_storage_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚµÄÍ·ÎÄ¼þ¡£
+ * @since TrustedCore V100R002C00B302
+ */
+TEE_Result TEE_GetNextPersistentObject(TEE_ObjectEnumHandle objectEnumerator,  TEE_ObjectInfo *objectInfo, void* objectID,  size_t* objectIDLen );
+
+#endif
+

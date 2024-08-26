@@ -1,0 +1,454 @@
+ï»¿/*!
+ *****************************************************************************
+ *
+ * @File       tee_client_api.h
+ * ---------------------------------------------------------------------------
+ *
+ * Copyright (c) Imagination Technologies Ltd.
+ * 
+ * The contents of this file are subject to the MIT license as set out below.
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a 
+ * copy of this software and associated documentation files (the "Software"), 
+ * to deal in the Software without restriction, including without limitation 
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+ * and/or sell copies of the Software, and to permit persons to whom the 
+ * Software is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in 
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
+ * THE SOFTWARE.
+ * 
+ * Alternatively, the contents of this file may be used under the terms of the 
+ * GNU General Public License Version 2 ("GPL")in which case the provisions of
+ * GPL are applicable instead of those above. 
+ * 
+ * If you wish to allow use of your version of this file only under the terms 
+ * of GPL, and not to allow others to use your version of this file under the 
+ * terms of the MIT license, indicate your decision by deleting the provisions 
+ * above and replace them with the notice and other provisions required by GPL 
+ * as set out in the file called "GPLHEADER" included in this distribution. If 
+ * you do not delete the provisions above, a recipient may use your version of 
+ * this file under the terms of either the MIT license or GPL.
+ * 
+ * This License is also included in this distribution in the file called 
+ * "MIT_COPYING".
+ *
+ *****************************************************************************/
+
+#ifndef _TEE_CLIENT_API_H_
+#define _TEE_CLIENT_API_H_
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+#define LOG_NDEBUG 0
+#define LOG_TAG "libteec"
+//DAB #include <android/log.h>
+#include "tee_client_type.h"
+
+/**
+ * @ingroup TEEC_BASIC_FUNC
+ * ÓÃÓÚ¼ÆËã·Ç°²È«ÊÀ½çÓë°²È«ÊÀ½ç´«µİ²ÎÊıµÄÊıÖµ
+ */
+#define TEEC_PARAM_TYPES( param0Type, param1Type, param2Type, param3Type) \
+    ((param3Type) << 12 | (param2Type) << 8 | (param1Type) << 4 | (param0Type))
+
+/**
+ * @ingroup TEEC_BASIC_FUNC
+ * ÓÃÓÚ¼ÆËãparamTypesÖĞ×Ö¶ÎindexµÄÊıÖµ
+ */
+#define TEEC_PARAM_TYPE_GET( paramTypes, index) \
+    (((paramTypes) >> (4*(index))) & 0x0F)
+
+/**
+ * @ingroup TEEC_BASIC_FUNC
+ * µ±²ÎÊıÀàĞÍÎª#TEEC_ValueÊ±£¬Èç¹û³ÉÔ±±äÁ¿a»òbÃ»ÓĞ¸ø¶¨Öµ£¬Ğè¸³Óè´ËÖµ£¬
+ * ±íÊ¾Ã»ÓĞÓÃµ½´Ë³ÉÔ±±äÁ¿
+ */
+#define TEEC_VALUE_UNDEF 0xFFFFFFFF
+
+/**
+ * @ingroup TEEC_VERSION
+ * TEEC°æ±¾ºÅ:1.0¶ÔÓ¦TrustedCore1.xx°æ±¾
+ */
+#define TEEC_VERSION (100)
+
+
+/**
+ * @ingroup TEEC_BASIC_FUNC
+ * µ÷ÊÔ½Ó¿Ú£¬ÔÚ¶¨ÒåºêTEEC_DEBUGÇé¿öÏÂÓĞĞ§£¬ºêTEEC_DEBUGÊÇµ÷ÊÔ´òÓ¡¿ª¹Ø
+ */
+#ifdef TEEC_DEBUG
+#define TEEC_Debug(...) __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG, __VA_ARGS__)
+#else
+#define TEEC_Debug(...)
+#endif
+
+#ifndef ENABLE_LIN_SO_BUILD
+/**
+ * @ingroup TEEC_BASIC_FUNC
+ * µ÷ÊÔ½Ó¿Ú£¬APIº¯ÊıÄÚ²¿´òÓ¡´íÎóĞÅÏ¢
+ */
+#define TEEC_Error(...) __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
+#else /* ENABLE_LIN_SO_BUILD */
+#define TEEC_Error(...) printf(__VA_ARGS__)
+#endif /* ENABLE_LIN_SO_BUILD */
+
+
+
+/**
+ * @ingroup  TEEC_BASIC_FUNC
+ * @brief ³õÊ¼»¯TEE»·¾³
+ *
+ * @par ÃèÊö:
+ * ³õÊ¼»¯Â·¾¶ÎªnameµÄTEE»·¾³£¬²ÎÊıname¿ÉÒÔÎª¿Õ£¬
+ * ³õÊ¼»¯TEE»·¾³ÊÇ´ò¿ª»á»°¡¢·¢ËÍÃüÁîµÄ»ù´¡£¬
+ * ³õÊ¼»¯³É¹¦ºó£¬¿Í»§¶ËÓ¦ÓÃÓëTEE½¨Á¢Ò»ÌõÁ´½Ó¡£
+ *
+ * @attention ÎŞ
+ * @param name [IN] TEE»·¾³Â·¾¶
+ * @param context [IN/OUT] contextÖ¸Õë£¬°²È«ÊÀ½ç»·¾³¾ä±ú
+ *
+ * @retval #TEEC_SUCCESS ³õÊ¼»¯TEE»·¾³³É¹¦
+ * @retval #TEEC_ERROR_BAD_PARAMETERS ²ÎÊı²»ÕıÈ·£¬name²»ÕıÈ·»òcontextÎª¿Õ
+ * @retval #TEEC_ERROR_GENERIC ÏµÍ³¿ÉÓÃ×ÊÔ´²»×ãµÈÔ­Òò
+ *
+ * @par ÒÀÀµ:
+ * @li libteec£º¸Ã½Ó¿ÚËùÊôµÄ¹²Ïí¿â
+ * @li tee_client_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚÍ·ÎÄ¼ş
+ * @see TEEC_FinalizeContext
+ * @since V100R002C00B301
+ */
+TEEC_Result TEEC_InitializeContext (
+    const char* name,
+    TEEC_Context* context);
+
+/**
+ * @ingroup  TEEC_BASIC_FUNC
+ * @brief ¹Ø±ÕTEE»·¾³
+ *
+ * @par ÃèÊö:
+ * ¹Ø±ÕcontextÖ¸ÏòµÄTEE»·¾³£¬¶Ï¿ª¿Í»§¶ËÓ¦ÓÃÓëTEE»·¾³µÄÁ´½Ó
+ *
+ * @attention ÎŞ
+ * @param context [IN/OUT] Ö¸ÏòÒÑ³õÊ¼»¯³É¹¦µÄTEE»·¾³
+ *
+ * @retval ÎŞ
+ *
+ * @par ÒÀÀµ:
+ * @li libteec£º¸Ã½Ó¿ÚËùÊôµÄ¹²Ïí¿â
+ * @li tee_client_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚÍ·ÎÄ¼ş
+ * @see TEEC_InitializeContext
+ * @since V100R002C00B301
+ */
+void TEEC_FinalizeContext (
+    TEEC_Context* context);
+
+/**
+ * @ingroup  TEEC_BASIC_FUNC
+ * @brief ´ò¿ª»á»°
+ *
+ * @par ÃèÊö:
+ * ÔÚÖ¸¶¨µÄTEE»·¾³contextÏÂ£¬Îª¿Í»§¶ËÓ¦ÓÃÓëUUIDÎªdestinationµÄ°²È«·şÎñ½¨Á¢Ò»ÌõÁ´½Ó£¬
+ * Á´½Ó·½Ê½ÊÇconnectionMethod£¬Á´½ÓÊı¾İÊÇconnectionData£¬´«µİµÄÊı¾İ°üº¬ÔÚopetationÀï¡£
+ * ´ò¿ª»á»°³É¹¦ºó£¬Êä³ö²ÎÊısessionÊÇ¶Ô¸ÃÁ´½ÓµÄÒ»¸öÃèÊö£»
+ * Èç¹û´ò¿ª»á»°Ê§°Ü£¬Êä³ö²ÎÊıreturnOriginÎª´íÎóÀ´Ô´¡£
+ *
+ * @attention ÎŞ
+ * @param context [IN/OUT] Ö¸ÏòÒÑ³õÊ¼»¯³É¹¦µÄTEE»·¾³
+ * @param session [OUT] Ö¸Ïò»á»°£¬È¡Öµ²»ÄÜÎª¿Õ
+ * @param destination [IN] °²È«·şÎñµÄUUID£¬Ò»¸ö°²È«·şÎñÓµÓĞÎ¨Ò»µÄUUID
+ * @param connectionMethod [IN] Á´½Ó·½Ê½£¬È¡Öµ·¶Î§Îª#TEEC_LoginMethod
+ * @param connectionData [IN] ÓëÁ´½Ó·½Ê½Ïà¶ÔÓ¦µÄÁ´½ÓÊı¾İ£¬
+ * Èç¹ûÁ´½Ó·½Ê½Îª#TEEC_LOGIN_PUBLIC¡¢#TEEC_LOGIN_USER¡¢
+ * #TEEC_LOGIN_USER_APPLICATION¡¢#TEEC_LOGIN_GROUP_APPLICATION£¬Á´½ÓÊı¾İÈ¡Öµ±ØĞëÎª¿Õ£¬
+ * Èç¹ûÁ´½Ó·½Ê½Îª#TEEC_LOGIN_GROUP¡¢#TEEC_LOGIN_GROUP_APPLICATION£¬
+ * Á´½ÓÊı¾İ±ØĞëÖ¸ÏòÀàĞÍÎªuint32_tµÄÊı¾İ£¬´ËÊı¾İ±íÊ¾¿Í»§¶ËÓ¦ÓÃÆÚÍûÁ´½ÓµÄ×éÓÃ»§
+ * @param operation [IN/OUT] ¿Í»§¶ËÓ¦ÓÃÓë°²È«·şÎñ´«µİµÄÊı¾İ
+ * @param returnOrigin [IN/OUT] ´íÎóÀ´Ô´£¬È¡Öµ·¶Î§Îª#TEEC_ReturnCodeOrigin
+ *
+ * @retval #TEEC_SUCCESS ´ò¿ª»á»°³É¹¦
+ * @retval #TEEC_ERROR_BAD_PARAMETERS ²ÎÊı²»ÕıÈ·£¬²ÎÊıcontextÎª¿Õ»òsessionÎª¿Õ»òdestinationÎª¿Õ
+ * @retval #TEEC_ERROR_ACCESS_DENIED ÏµÍ³µ÷ÓÃÈ¨ÏŞ·ÃÎÊÊ§°Ü
+ * @retval #TEEC_ERROR_OUT_OF_MEMORY ÏµÍ³¿ÉÓÃ×ÊÔ´²»×ã
+ * @retval #TEEC_ERROR_TRUSTED_APP_LOAD_ERROR ¼ÓÔØ°²È«·şÎñÊ§°Ü
+ * @retval ÆäËü·µ»ØÖµ²Î¿¼ #TEEC_ReturnCode
+ *
+ * @par ÒÀÀµ:
+ * @li libteec£º¸Ã½Ó¿ÚËùÊôµÄ¹²Ïí¿â
+ * @li tee_client_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚÍ·ÎÄ¼ş
+ * @see TEEC_CloseSession
+ * @since V100R002C00B301
+ */
+TEEC_Result TEEC_OpenSession (
+    TEEC_Context* context,
+    TEEC_Session* session,
+    const TEEC_UUID* destination,
+    uint32_t connectionMethod,
+    const void* connectionData,
+    TEEC_Operation* operation,
+    uint32_t* returnOrigin);
+
+/**
+ * @ingroup  TEEC_BASIC_FUNC
+ * @brief ¹Ø±Õ»á»°
+ *
+ * @par ÃèÊö:
+ * ¹Ø±ÕsessionÖ¸ÏòµÄ»á»°£¬¶Ï¿ª¿Í»§¶ËÓ¦ÓÃÓë°²È«·şÎñµÄÁ´½Ó
+ *
+ * @attention ÎŞ
+ * @param session [IN/OUT] Ö¸ÏòÒÑ³É¹¦´ò¿ªµÄ»á»°
+ *
+ * @retval ÎŞ
+ *
+ * @par ÒÀÀµ:
+ * @li libteec£º¸Ã½Ó¿ÚËùÊôµÄ¹²Ïí¿â
+ * @li tee_client_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚÍ·ÎÄ¼ş
+ * @see TEEC_OpenSession
+ * @since V100R002C00B301
+ */
+void TEEC_CloseSession(
+    TEEC_Session* session);
+
+/**
+ * @ingroup  TEEC_BASIC_FUNC
+ * @brief ·¢ËÍÃüÁî
+ *
+ * @par ÃèÊö:
+ * ÔÚÖ¸¶¨µÄ»á»°sessionÀï£¬ÓÉ¿Í»§¶ËÓ¦ÓÃÏò°²È«·şÎñ·¢ËÍÃüÁîcommandID£¬
+ * ·¢ËÍµÄÊı¾İÎªoperation£¬Èç¹û·¢ËÍÃüÁîÊ§°Ü£¬Êä³ö²ÎÊıreturnOriginÎª´íÎóÀ´Ô´
+ *
+ * @attention ÎŞ
+ * @param session [IN/OUT] Ö¸ÏòÒÑ´ò¿ª³É¹¦µÄ»á»°
+ * @param commandID [IN] °²È«·şÎñÖ§³ÖµÄÃüÁîID£¬ÓÉ°²È«·şÎñ¶¨Òå
+ * @param operation [IN/OUT] °üº¬ÁË¿Í»§¶ËÓ¦ÓÃÏò°²È«·şÎñ·¢ËÍµÄÊı¾İÄÚÈİ
+ * @param returnOrigin [IN/OUT] ´íÎóÀ´Ô´£¬È¡Öµ·¶Î§Îª#TEEC_ReturnCodeOrigin
+ *
+ * @retval #TEEC_SUCCESS ·¢ËÍÃüÁî³É¹¦
+ * @retval #TEEC_ERROR_BAD_PARAMETERS ²ÎÊı²»ÕıÈ·£¬²ÎÊısessionÎª¿Õ»ò²ÎÊıoperation¸ñÊ½²»ÕıÈ·
+ * @retval #TEEC_ERROR_ACCESS_DENIED ÏµÍ³µ÷ÓÃÈ¨ÏŞ·ÃÎÊÊ§°Ü
+ * @retval #TEEC_ERROR_OUT_OF_MEMORY ÏµÍ³¿ÉÓÃ×ÊÔ´²»×ã
+ * @retval ÆäËü·µ»ØÖµ²Î¿¼ #TEEC_ReturnCode
+ *
+ * @par ÒÀÀµ:
+ * @li libteec£º¸Ã½Ó¿ÚËùÊôµÄ¹²Ïí¿â
+ * @li tee_client_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚÍ·ÎÄ¼ş
+ * @see ÎŞ
+ * @since V100R002C00B301
+ */
+TEEC_Result TEEC_InvokeCommand(
+    TEEC_Session*     session,
+    uint32_t          commandID,
+    TEEC_Operation*   operation,
+    uint32_t*         returnOrigin);
+
+/**
+ * @ingroup  TEEC_BASIC_FUNC
+ * @brief ×¢²á¹²ÏíÄÚ´æ
+ *
+ * @par ÃèÊö:
+ * ÔÚÖ¸¶¨µÄTEE»·¾³contextÄÚ×¢²á¹²ÏíÄÚ´æsharedMem£¬
+ * Í¨¹ı×¢²áµÄ·½Ê½»ñÈ¡¹²ÏíÄÚ´æÀ´ÊµÏÖÁã¿½±´ĞèÒª²Ù×÷ÏµÍ³µÄÖ§³Ö£¬
+ * Ä¿Ç°µÄÊµÏÖÖĞ£¬¸Ã·½Ê½²»ÄÜÊµÏÖÁã¿½±´
+ *
+ * @attention Èç¹ûÈë²ÎsharedMemµÄsizeÓòÉèÖÃÎª0£¬º¯Êı»á·µ»Ø³É¹¦£¬µ«ÎŞ·¨Ê¹ÓÃÕâ¿é
+ * ¹²ÏíÄÚ´æ£¬ÒòÎªÕâ¿éÄÚ´æÃ»ÓĞ´óĞ¡
+ * @param context [IN/OUT] ÒÑ³õÊ¼»¯³É¹¦µÄTEE»·¾³
+ * @param sharedMem [IN/OUT] ¹²ÏíÄÚ´æÖ¸Õë£¬¹²ÏíÄÚ´æËùÖ¸ÏòµÄÄÚ´æ²»ÄÜÎª¿Õ¡¢´óĞ¡²»ÄÜÎªÁã
+ *
+ * @retval #TEEC_SUCCESS ·¢ËÍÃüÁî³É¹¦
+ * @retval #TEEC_ERROR_BAD_PARAMETERS ²ÎÊı²»ÕıÈ·£¬²ÎÊıcontextÎª¿Õ»òsharedMemÎª¿Õ£¬
+ * »ò¹²ÏíÄÚ´æËùÖ¸ÏòµÄÄÚ´æÎª¿Õ
+ *
+ * @par ÒÀÀµ:
+ * @li libteec£º¸Ã½Ó¿ÚËùÊôµÄ¹²Ïí¿â
+ * @li tee_client_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚÍ·ÎÄ¼ş
+ * @see TEEC_AllocateSharedMemory
+ * @since V100R002C00B301
+ */
+TEEC_Result TEEC_RegisterSharedMemory (
+    TEEC_Context* context,
+    TEEC_SharedMemory* sharedMem);
+
+/**
+ * @ingroup  TEEC_BASIC_FUNC
+ * @brief ÉêÇë¹²ÏíÄÚ´æ
+ *
+ * @par ÃèÊö:
+ * ÔÚÖ¸¶¨µÄTEE»·¾³contextÄÚÉêÇë¹²ÏíÄÚ´æsharedMem£¬
+ * Í¨¹ı¹²ÏíÄÚ´æ¿ÉÒÔÊµÏÖ·Ç°²È«ÊÀ½çÓë°²È«ÊÀ½ç´«µİÊı¾İÊ±µÄÁã¿½±´
+ *
+ * @attention Èç¹ûÈë²ÎsharedMemµÄsizeÓòÉèÖÃÎª0£¬º¯Êı»á·µ»Ø³É¹¦£¬µ«ÎŞ·¨Ê¹ÓÃÕâ¿é
+ * ¹²ÏíÄÚ´æ£¬ÒòÎªÕâ¿éÄÚ´æ¼ÈÃ»ÓĞµØÖ·Ò²Ã»ÓĞ´óĞ¡
+ * @param context [IN/OUT] ÒÑ³õÊ¼»¯³É¹¦µÄTEE»·¾³
+ * @param sharedMem [IN/OUT] ¹²ÏíÄÚ´æÖ¸Õë£¬¹²ÏíÄÚ´æµÄ´óĞ¡²»ÄÜÎªÁã
+ *
+ * @retval #TEEC_SUCCESS ·¢ËÍÃüÁî³É¹¦
+ * @retval #TEEC_ERROR_BAD_PARAMETERS ²ÎÊı²»ÕıÈ·£¬²ÎÊıcontextÎª¿Õ»òsharedMemÎª¿Õ
+ * @retval #TEEC_ERROR_OUT_OF_MEMORY ÏµÍ³¿ÉÓÃ×ÊÔ´²»×ã£¬·ÖÅäÊ§°Ü
+ *
+ * @par ÒÀÀµ:
+ * @li libteec£º¸Ã½Ó¿ÚËùÊôµÄ¹²Ïí¿â
+ * @li tee_client_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚÍ·ÎÄ¼ş
+ * @see TEEC_RegisterSharedMemory
+ * @since V100R002C00B301
+ */
+TEEC_Result TEEC_AllocateSharedMemory (
+    TEEC_Context* context,
+    TEEC_SharedMemory* sharedMem);
+
+/**
+ * @ingroup  TEEC_BASIC_FUNC
+ * @brief ÊÍ·Å¹²ÏíÄÚ´æ
+ *
+ * @par ÃèÊö:
+ * ÊÍ·ÅÒÑ×¢²á³É¹¦µÄµÄ»òÒÑÉêÇë³É¹¦µÄ¹²ÏíÄÚ´æsharedMem
+ *
+ * @attention Èç¹ûÊÇÍ¨¹ı#TEEC_AllocateSharedMemory·½Ê½»ñÈ¡µÄ¹²ÏíÄÚ´æ£¬
+ * ÊÍ·ÅÊ±»á»ØÊÕÕâ¿éÄÚ´æ£»Èç¹ûÊÇÍ¨¹ı#TEEC_RegisterSharedMemory·½Ê½
+ * »ñÈ¡µÄ¹²ÏíÄÚ´æ£¬ÊÍ·ÅÊ±²»»á»ØÊÕ¹²ÏíÄÚ´æËùÖ¸ÏòµÄ±¾µØÄÚ´æ
+ * @param sharedMem [IN/OUT] Ö¸ÏòÒÑ×¢²á³É¹¦»òÉêÇë³É¹¦µÄ¹²ÏíÄÚ´æ
+ *
+ * @retval ÎŞ
+ *
+ * @par ÒÀÀµ:
+ * @li libteec£º¸Ã½Ó¿ÚËùÊôµÄ¹²Ïí¿â
+ * @li tee_client_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚÍ·ÎÄ¼ş
+ * @see TEEC_RegisterSharedMemory | TEEC_AllocateSharedMemory
+ * @since V100R002C00B301
+ */
+void TEEC_ReleaseSharedMemory (
+    TEEC_SharedMemory* sharedMem);
+
+/**
+ * @ingroup  TEEC_BASIC_FUNC
+ * @brief cancel API
+ *
+ * @par ÃèÊö:
+ * È¡ÏûµôÒ»¸öÕıÔÚÔËĞĞµÄopen Session»òÕßÊÇÒ»¸öinvoke command
+ * ·¢ËÍÒ»¸öcancelµÄsignalºóÁ¢¼´·µ»Ø
+ *
+ * @attention ´Ë²Ù×÷½ö½öÊÇ·¢ËÍÒ»¸öcancelµÄÏûÏ¢£¬ÊÇ·ñ½øĞĞcancel²Ù×÷ÓÉÇ°ÃæµÄTEE »ò TA¾ö¶¨
+ * @param operation [IN/OUT] °üº¬ÁË¿Í»§¶ËÓ¦ÓÃÏò°²È«·şÎñ·¢ËÍµÄÊı¾İÄÚÈİ
+ *
+ * @retval ÎŞ
+ *
+ * @par ÒÀÀµ:
+ * @li libteec£º¸Ã½Ó¿ÚËùÊôµÄ¹²Ïí¿â
+ * @li tee_client_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚÍ·ÎÄ¼ş
+ * @see ÎŞ
+ * @since V100R002C00B309
+ */
+ void TEEC_RequestCancellation(
+ TEEC_Operation *operation);
+
+
+
+TEEC_Result TEEC_EXT_GetTEEInfo (TEEC_EXT_TEEInfo *tee_info_data, uint32_t *length);
+
+/**
+ * @ingroup  TEEC_EXT_FUNC
+ * @brief register agent API
+ *
+ * @par ÃèÊö:
+ * ·Ç°²È«²à×¢²áagent£¨listener£©µÄ½Ó¿Ú
+ *
+ * @attention ´Ë²Ù×÷Ê×ÏÈ»áÓ³Éä²¢×¢²á¹²ÏíÄÚ´æ£¨Ä¿Ç°Ö»Ö§³Ö4K´óĞ¡µÄ¹²ÏíÄÚ´æ£©£¬È»ºóÔÙ×¢²áagent
+ * @param agent_id [IN] ÓÃ»§´«ÈëÒ»¸öagent_id£¬ÓëTA½øĞĞÍ¨ĞÅµÄÎ¨Ò»±êÊ¶£¬
+ * Òò´Ë£¬TA·¢ËÍÏûÏ¢¸øCAÊ±£¬»á¸ù¾İ¸Ãagent_idÀ´·¢ÆğÍ¨ĞÅ
+ * @param dev_fd [OUT] ÓÃ»§»ñÈ¡·ÃÎÊTEEÇı¶¯Éè±¸µÄÃèÊö·û
+ * @param buffer [OUT] ÓÃ»§»ñÈ¡Ö¸Ïò¹²ÏíÄÚ´æµÄÓÃ»§Ì¬µØÖ·
+ * @retval #TEEC_SUCCESS agent×¢²á³É¹¦
+ * @retval #TEEC_ERROR_GENERIC ÆäËûµÄÒ»°ã´íÎó
+ *
+ * @par ÒÀÀµ:
+ * @li libteec£º¸Ã½Ó¿ÚËùÊôµÄ¹²Ïí¿â
+ * @li tee_client_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚÍ·ÎÄ¼ş
+ * @see ÎŞ
+ * @since V100R005C00
+ */
+TEEC_Result TEEC_EXT_RegisterAgent (uint32_t agent_id, int* dev_fd, void** buffer);
+
+/**
+ * @ingroup  TEEC_EXT_FUNC
+ * @brief wait for event from TA
+ *
+ * @par ÃèÊö:
+ * ·Ç°²È«²àagentµÈ´ı°²È«²àTAÊÂ¼ş
+ *
+ * @attention ´Ë½Ó¿Ú»á×èÈûµÈ´ı£¬Òò´Ë½¨ÒéÔÚĞÂ´´½¨µÄÏß³ÌÖĞÀ´µ÷ÓÃ´Ë½Ó¿Ú
+ * @param agent_id [IN] ÓÃ»§´«ÈëÒ»¸öagent_id£¬ÓëTA½øĞĞÍ¨ĞÅµÄÎ¨Ò»±êÊ¶£¬
+ * Òò´Ë£¬TA·¢ËÍÏûÏ¢¸øCAÊ±£¬»á¸ù¾İ¸Ãagent_idÀ´·¢ÆğÍ¨ĞÅ
+ * @param dev_fd [IN] ·ÃÎÊTEEÇı¶¯Éè±¸µÄÃèÊö·û
+ * @retval #TEEC_SUCCESS agentµÈ´ıTAÏûÏ¢ÊÂ¼ş³É¹¦
+ * @retval #TEEC_ERROR_GENERIC ÆäËûµÄÒ»°ã´íÎó
+ *
+ * @par ÒÀÀµ:
+ * @li libteec£º¸Ã½Ó¿ÚËùÊôµÄ¹²Ïí¿â
+ * @li tee_client_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚÍ·ÎÄ¼ş
+ * @see ÎŞ
+ * @since V100R005C00
+ */
+TEEC_Result TEEC_EXT_WaitEvent(uint32_t agent_id, int dev_fd);
+
+/**
+ * @ingroup  TEEC_EXT_FUNC
+ * @brief send response to TA
+ *
+ * @par ÃèÊö:
+ * ·Ç°²È«²àagentÏìÓ¦°²È«²àTAµÄÊÂ¼ş
+ *
+ * @attention ´Ë½Ó¿Ú»á»½ĞÑÖ÷½ø³Ì¼ÌĞøÖ´ĞĞ
+ * @param agent_id [IN] ÓÃ»§´«ÈëÒ»¸öagent_id£¬ÓëTA½øĞĞÍ¨ĞÅµÄÎ¨Ò»±êÊ¶£¬
+ * Òò´Ë£¬TA·¢ËÍÏûÏ¢¸øCAÊ±£¬»á¸ù¾İ¸Ãagent_idÀ´·¢ÆğÍ¨ĞÅ
+ * @param dev_fd [IN] ÓÃ»§·ÃÎÊTEEÇı¶¯Éè±¸µÄÃèÊö·û
+ * @retval #TEEC_SUCCESS agentÏìÓ¦ÊÂ¼ş·¢ËÍ³É¹¦
+ * @retval #TEEC_ERROR_GENERIC ÆäËûµÄÒ»°ã´íÎó
+ *
+ * @par ÒÀÀµ:
+ * @li libteec£º¸Ã½Ó¿ÚËùÊôµÄ¹²Ïí¿â
+ * @li tee_client_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚÍ·ÎÄ¼ş
+ * @see ÎŞ
+ * @since V100R005C00
+ */
+TEEC_Result TEEC_EXT_SendEventResponse(uint32_t agent_id, int dev_fd);
+
+
+/**
+ * @ingroup  TEEC_EXT_FUNC
+ * @brief unregister agent API
+ *
+ * @par ÃèÊö:
+ * ·Ç°²È«²àÈ¥×¢²áagent£¨listener£©µÄ½Ó¿Ú
+ *
+ * @attention ´Ë½Ó¿Ú»áÍ¨ÖªÄÚºËÈ¥×¢²áagent£¬Í¬Ê±ÊÍ·Å¹²ÏíÄÚ´æ£¬Òò´ËÖ¸Ïò¹²ÏíÄÚ´æµÄ
+ * ÓÃ»§Ì¬Ö¸Õë²»ÄÜÔÙ¼ÌĞøÊ¹ÓÃÁË
+ * @param agent_id [IN] ÓÃ»§´«ÈëÒ»¸öagent_id£¬ÓëTA½øĞĞÍ¨ĞÅµÄÎ¨Ò»±êÊ¶£¬
+ * Òò´Ë£¬TA·¢ËÍÏûÏ¢¸øCAÊ±£¬»á¸ù¾İ¸Ãagent_idÀ´·¢ÆğÍ¨ĞÅ
+ * @param dev_fd [IN] ÓÃ»§·ÃÎÊTEEÇı¶¯Éè±¸µÄÃèÊö·û
+ * @param buffer [IN] ÓÃ»§Ö¸Ïò¹²ÏíÄÚ´æµÄÓÃ»§Ì¬µØÖ·£¬º¯Êı·µ»ØÊ±»á½«Ö¸ÕëÖÃÎªNULL
+ * @retval #TEEC_SUCCESS agentÈ¥×¢²á³É¹¦
+ * @retval #TEEC_ERROR_GENERIC ÆäËûµÄÒ»°ã´íÎó
+ *
+ * @par ÒÀÀµ:
+ * @li libteec£º¸Ã½Ó¿ÚËùÊôµÄ¹²Ïí¿â
+ * @li tee_client_api.h£º¸Ã½Ó¿ÚÉùÃ÷ËùÔÚÍ·ÎÄ¼ş
+ * @see ÎŞ
+ * @since V100R005C00
+ */
+TEEC_Result TEEC_EXT_UnregisterAgent (uint32_t agent_id, int dev_fd, void** buffer);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+

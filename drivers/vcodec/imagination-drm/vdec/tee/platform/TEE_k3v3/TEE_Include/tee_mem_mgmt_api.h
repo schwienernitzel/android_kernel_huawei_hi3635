@@ -1,0 +1,242 @@
+ï»¿/*!
+ *****************************************************************************
+ *
+ * @File       tee_mem_mgmt_api.h
+ * ---------------------------------------------------------------------------
+ *
+ * Copyright (c) Imagination Technologies Ltd.
+ * 
+ * The contents of this file are subject to the MIT license as set out below.
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a 
+ * copy of this software and associated documentation files (the "Software"), 
+ * to deal in the Software without restriction, including without limitation 
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+ * and/or sell copies of the Software, and to permit persons to whom the 
+ * Software is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in 
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
+ * THE SOFTWARE.
+ * 
+ * Alternatively, the contents of this file may be used under the terms of the 
+ * GNU General Public License Version 2 ("GPL")in which case the provisions of
+ * GPL are applicable instead of those above. 
+ * 
+ * If you wish to allow use of your version of this file only under the terms 
+ * of GPL, and not to allow others to use your version of this file under the 
+ * terms of the MIT license, indicate your decision by deleting the provisions 
+ * above and replace them with the notice and other provisions required by GPL 
+ * as set out in the file called "GPLHEADER" included in this distribution. If 
+ * you do not delete the provisions above, a recipient may use your version of 
+ * this file under the terms of either the MIT license or GPL.
+ * 
+ * This License is also included in this distribution in the file called 
+ * "MIT_COPYING".
+ *
+ *****************************************************************************/
+
+#ifndef __TEE_MEM_MGMT_API_H
+#define __TEE_MEM_MGMT_API_H
+
+#include "tee_internal_api.h"
+
+enum MALLOC_HINT{
+    ZERO = 0,
+    NOT_ZERO = 1,
+};
+
+/**
+* @ingroup  grp_mem_api
+* @brief ½«bufferÖ¸ÏòµÄ»º³åÇøµÄÇ°size¸ö×Ö½ÚÌî³äÎªx,buffer¿ÉÒÔÖ¸ÏòÈÎÒâÀàĞÍµÄ»º³åÇø¡£
+*
+* @par ÃèÊö:
+* ÎŞ
+*
+* @attention ÎŞ
+* @param buffer [OUT] Ö¸Ïò»º³åÇøµÄÖ¸Õë
+* @param x [IN] Ìî³äµÄÖµ
+* @param size [IN] Ìî³äµÄ×Ö½ÚÊı
+*
+* @retval ÎŞ
+*
+* @par ÒÀÀµ:
+* @li tee_internal_api.h£ºÄÚ²¿Êı¾İÀàĞÍ¶¨Òå
+**/
+void TEE_MemFill(void* buffer, uint32_t x, uint32_t size);
+
+/**
+* @ingroup  grp_mem_api
+* @brief ´ÓsrcÖ¸ÏòµÄ»º³åÇø¿½±´size×Ö½Úµ½destÖ¸ÏòµÄ»º³åÇø
+*
+* @par ÃèÊö:
+* ÎŞ
+*
+* @attention srcºÍdest¿ÉÒÔÖ¸ÏòÈÎÒâÀàĞÍµÄ»º³åÇø
+* @param dest [OUT] Ö¸ÏòÄ¿±ê»º³åÇøµÄÖ¸Õë
+* @param src [IN] Ö¸ÏòÔ´»º³åÇøµÄÖ¸Õë
+* @param size [IN] ¿½±´µÄ×Ö½ÚÊı
+*
+* @retval ÎŞ
+*
+* @par ÒÀÀµ:
+* @li tee_internal_api.h£ºÄÚ²¿Êı¾İÀàĞÍ¶¨Òå
+**/
+void TEE_MemMove(void* dest, void* src, uint32_t size);
+
+/**
+* @ingroup  grp_mem_api
+* @brief ¶¯Ì¬ÉêÇë×Ö½ÚÊıÎªsizeµÄÄÚ´æ
+*
+* @par ÃèÊö:
+* ·µ»ØµÄÖ¸ÕëµÄ¶ÔÆë·½Ê½±£Ö¤¿ÉÒÔÖ¸ÏòÈÎºÎCÓïÑÔÖĞ¶¨ÒåµÄ»ù±¾ÀàĞÍ£¬\n
+* ²ÎÊıhintÊÇÒ»¸ö´«µİ¸ø·ÖÅäÆ÷µÄ±êÖ¾¡£µ±Ç°°æ±¾Ö»ÊµÏÖÁËÒ»ÖÖhintÖµ£¬\n
+* ºóĞø°æ±¾Èç¹ûÔö¼ÓhintµÄÖÖÀà£¬Ôò»áÔö¼ÓÏà¹ØµÄÃèÊö¡£
+*
+* @attention ÎŞ
+* @param size [IN] ÉêÇëµÄÄÚ´æ´óĞ¡
+* @param hint [IN] ·ÖÅä±êÖ¾£¬0±íÊ¾ÉêÇëµÄÄÚ´æÔÚ·µ»ØÇ°ÒÑ¾­±»ÇåÁã£¬ÆäËüÖµ¶¼±»ºöÂÔ
+*
+* @retval ²»µÈÓÚNULLµÄÖµ Ö¸ÏòÉêÇëµ½µÄÄÚ´æµÄÖ¸Õë
+* @retval NULL ±íÊ¾ÉêÇëÊ§°Ü
+*
+* @par ÒÀÀµ:
+* @li tee_internal_api.h£ºÄÚ²¿Êı¾İÀàĞÍ¶¨Òå
+* @see TEE_Realloc | TEE_Free
+**/
+void* TEE_Malloc(size_t size, uint32_t hint);
+
+/**
+* @ingroup  grp_mem_api
+* @brief ÊÍ·Å¶¯Ì¬ÉêÇëµÄÄÚ´æ
+*
+* @par ÃèÊö:
+* Èç¹ûbufferµÈÓÚNULL£¬ÄÇÃ´TEE_Free²»×öÈÎºÎ¶¯×÷¡£\n
+* ÓÃ»§ĞèÒª×¢Òâ´«µİµÄbufferÖ¸ÕëÊÇÍ¨¹ıTEE_Malloc»òÕßTEE_ReallocÉêÇëµÄ£¬\n
+* ²¢ÇÒÃ»ÓĞ±»TEE_FreeÊÍ·Å¹ı£¬·ñÔòºó¹û½«²»¿ÉÔ¤ÁÏ¡£
+*
+* @attention ÎŞ
+* @param buffer [IN] Ö¸ÏòĞèÒªÊÍ·ÅµÄÄÚ´æµÄÖ¸Õë
+*
+* @retval ÎŞ
+*
+* @par ÒÀÀµ:
+* @li tee_internal_api.h£ºÄÚ²¿Êı¾İÀàĞÍ¶¨Òå
+* @see TEE_Malloc | TEE_Realloc
+**/
+void TEE_Free(void *buffer);
+
+/**
+* @ingroup grp_mem_api
+* @brief ĞŞ¸Ä¶¯Ì¬ÄÚ´æµÄ´óĞ¡
+*
+* @par ÃèÊö:
+* ĞŞ¸Ä´óĞ¡ºóµÄÄÚ´æÈç¹û´óÓÚÔ­Ê¼´óĞ¡£¬Ô­ÄÚ´æÖĞµÄÄÚÈİ»á±»±£Áô£¬³¬³ö²¿·ÖµÄÄÚÈİÊÇÈÎÒâµÄ¡£\n
+* ÔÚ¸ü¸ÄÄÚ´æ´óĞ¡Ê±£¬¿ÉÄÜĞèÒªÖØĞÂÉêÇëÄÚ´æ£¬Èç¹ûÕâÊ±·ÖÅäÊ§°Ü£¬ÄÇÃ´Ô­Ê¼ÄÚ´æ¾Í»á±»±£Áô£¬\n
+* Í¬Ê±º¯Êı·µ»ØNULL¡£\n
+* Èç¹ûbufferµÈÓÚNULL£¬ÄÇÃ´º¯Êı¹¦ÄÜ¾ÍÓëTEE_MallocÏàÍ¬¡£
+*
+* @attention
+* ÓÃ»§ĞèÒª×¢Òâ´«µİµÄbufferÖ¸ÕëÊÇÍ¨¹ıTEE_Malloc»òÕßTEE_ReallocÉêÇëµÄ£¬
+* ²¢ÇÒÃ»ÓĞ±»TEE_FreeÊÍ·Å¹ı£¬·ñÔòºó¹û½«²»¿ÉÔ¤ÁÏ¡£
+* @param buffer [IN] Ö¸ÏòĞèÒªĞŞ¸Ä´óĞ¡µÄÄÚ´æµÄÖ¸Õë
+* @param new_size [IN] ĞŞ¸ÄºóµÄ´óĞ¡
+*
+* @retval ²»µÈÓÚNULLµÄÖµ Ö¸ÏòĞÂµÄ¶¯Ì¬ÄÚ´æµÄÖ¸Õë
+* @retval NULL ±íÊ¾ÉêÇëÊ§°Ü
+*
+* @par ÒÀÀµ:
+* @li tee_internal_api.h£ºÄÚ²¿Êı¾İÀàĞÍ¶¨Òå
+* @see TEE_Malloc | TEE_Free
+**/
+void* TEE_Realloc(void *buffer, uint32_t new_size);
+
+/**
+* @ingroup grp_mem_api
+* @brief ÄÚ´æÄÚÈİ±È½Ï
+*
+* @par ÃèÊö:
+* ×Ö·û´®´óĞ¡ÊÇ°´ÕÕË³Ğò±È½ÏÃ¿¸ö×Ö·ûµÄASCII´óĞ¡£¬Ö±µ½³öÏÖ´óĞ¡²»Ò»ÑùµÄ×Ö·û»òÕß½áÊø·û¡£
+*
+* @attention ÎŞ
+* @param buffer1 [IN] Ö¸Ïò±È½ÏµÄµÚÒ»¸ö»º³åÇøµÄÖ¸Õë
+* @param buffer2 [IN] Ö¸Ïò±È½ÏµÄµÚ¶ş¸ö»º³åÇøµÄÖ¸Õë
+* @param size [IN] ±È½ÏµÄ×Ö½ÚÊı
+*
+* @retval -1 buffer1Ö¸ÏòµÄ»º³åÇøĞ¡ÓÚbuffer2Ö¸ÏòµÄ»º³åÇø
+* @retval 0 buffer1Ö¸ÏòµÄ»º³åÇøµÈÓÚbuffer2Ö¸ÏòµÄ»º³åÇø
+* @retval 1 buffer1Ö¸ÏòµÄ»º³åÇø´óÓÚbuffer2Ö¸ÏòµÄ»º³åÇø
+*
+* @par ÒÀÀµ:
+* @li tee_internal_api.h£ºÄÚ²¿Êı¾İÀàĞÍ¶¨Òå
+**/
+int32_t TEE_MemCompare(void *buffer1, void *buffer2, uint32_t size);
+
+/**
+* @brief ¼ì²ébufferÖ¸ÏòµÄ»º³åÇøµÄ·ÃÎÊÈ¨ÏŞ
+*
+* @par ÃèÊö:
+* µ±Ç°°æ±¾Ã»ÓĞÊµÏÖ¡£
+*
+* @attention ÎŞ
+* @param accessFlags [IN] ¼ì²éµÄ·ÃÎÊÀàĞÍ
+* @param buffer [IN] Ö¸ÏòĞèÒª¼ì²éµÄÄÚ´æµÄÖ¸Õë
+* @param size [IN] ĞèÒª¼ì²éµÄÄÚ´æµÄ´óĞ¡
+*
+* @retval #TEE_SUCCESS ¸ÃÄÚ´æÓµÓĞaccessFlagsÖ¸¶¨µÄ·ÃÎÊÈ¨ÏŞ
+* @retval #TEE_ERROR_ACCESS_DENIED ¸ÃÄÚ´æÃ»ÓĞÓĞaccessFlagsÖ¸¶¨µÄ·ÃÎÊÈ¨ÏŞ
+*
+* @par ÒÀÀµ:
+* @li tee_internal_api.h£ºÄÚ²¿Êı¾İÀàĞÍ¶¨Òå
+**/
+TEE_Result TEE_CheckMemoryAccessRights(uint32_t accessFlags, void* buffer, size_t size);
+
+/**
+* @ingroup grp_mem_api
+* @brief
+* ÉèÖÃÒ»¸öÈ«¾Ö±äÁ¿ÓÃÓÚÍ¬Ò»InstanceÄÚµÄ¶à¸öSession¼ä¹²Ïí¡£\n
+* InstanceºÍSessionµÄ¾ßÌåÃèÊö¼ûÓÃ»§¿ª·¢ÊÖ²áÏàÓ¦ÕÂ½Ú¡£
+*
+* @par ÃèÊö:
+* ÎŞ
+*
+* @attention ÎŞ
+* @param instanceData [IN] ÉèÖÃµÄÈ«¾Ö±äÁ¿µÄµØÖ·
+*
+* @retval ÎŞ
+*
+* @par ÒÀÀµ:
+* @li tee_internal_api.h£ºÄÚ²¿Êı¾İÀàĞÍ¶¨Òå
+**/
+void TEE_SetInstanceData(void* instanceData);
+
+/**
+* @ingroup grp_mem_api
+* @brief »ñÈ¡TEE_SetInstanceDataÉèÖÃµÄÈ«¾Ö±äÁ¿µÄÖ¸Õë
+*
+* @par ÃèÊö:
+* ÎŞ
+*
+* @attention ÎŞ
+* @param ÎŞ
+*
+* @retval ²»µÈÓÚNULLµÄÖµ Ö¸ÏòTEE_SetInstanceDataÉèÖÃµÄÈ«¾Ö±äÁ¿µÄÖ¸Õë
+* @retval NULL Ã»ÓĞInstanceData±»ÉèÖÃ
+*
+* @par ÒÀÀµ:
+* @li tee_internal_api.h£ºÄÚ²¿Êı¾İÀàĞÍ¶¨Òå
+**/
+void* TEE_GetInstanceData(void);
+
+uint32_t get_mem_usage(bool show);
+
+#endif
+
+

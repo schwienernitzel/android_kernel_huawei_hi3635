@@ -1,0 +1,31 @@
+/*
+ *  Copyright (C) 2012-2013 HISI.
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License version 2 as
+ *  publishhed by the Free Software Foundation.
+ */
+
+/ {
+        hisi_tsi1: hisi_tsi1@0 {
+			compatible = "hisilicon,hisi_tsi1";
+			reg = <0x0 0xFDF21000 0x0 0x1000>;
+			device-id = <0>;
+			reset-reg-base = <0x0 0xfff35000 0x0 0x1000>;
+			disreset-reg-bit = <19 20 0x7c 0x0>;
+			interrupts = <0 66 4>;
+			interrupt-names = "hisi_tsi1";
+			dmas = <&dma0 23>;
+			dma-names = "rx";
+			clocks = <&pclk_gate_tsi1>, <&clk_gate_dmatsibus>;
+			clock-names = "pclk_tsi1", "clk_dmatsibus";
+			pinctrl-names = "default", "idle";
+			pinctrl-0 = <&gpio072_pmx_func &gpio073_pmx_func &gpio157_pmx_func
+					 &gpio159_pmx_func &gpio072_cfg_func &gpio073_cfg_func &gpio157_cfg_func
+					 &gpio159_cfg_func>;
+			pinctrl-1 = <&gpio072_pmx_idle &gpio073_pmx_idle &gpio157_pmx_idle
+					 &gpio159_pmx_idle &gpio072_cfg_idle &gpio073_cfg_idle
+					 &gpio157_cfg_idle &gpio159_cfg_idle>;
+			status = "ok";
+	};
+};

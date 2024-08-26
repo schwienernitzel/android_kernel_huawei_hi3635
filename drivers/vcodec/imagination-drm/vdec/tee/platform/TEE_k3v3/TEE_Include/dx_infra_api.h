@@ -1,0 +1,237 @@
+ï»¿/*!
+ *****************************************************************************
+ *
+ * @File       dx_infra_api.h
+ * ---------------------------------------------------------------------------
+ *
+ * Copyright (c) Imagination Technologies Ltd.
+ * 
+ * The contents of this file are subject to the MIT license as set out below.
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a 
+ * copy of this software and associated documentation files (the "Software"), 
+ * to deal in the Software without restriction, including without limitation 
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+ * and/or sell copies of the Software, and to permit persons to whom the 
+ * Software is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in 
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
+ * THE SOFTWARE.
+ * 
+ * Alternatively, the contents of this file may be used under the terms of the 
+ * GNU General Public License Version 2 ("GPL")in which case the provisions of
+ * GPL are applicable instead of those above. 
+ * 
+ * If you wish to allow use of your version of this file only under the terms 
+ * of GPL, and not to allow others to use your version of this file under the 
+ * terms of the MIT license, indicate your decision by deleting the provisions 
+ * above and replace them with the notice and other provisions required by GPL 
+ * as set out in the file called "GPLHEADER" included in this distribution. If 
+ * you do not delete the provisions above, a recipient may use your version of 
+ * this file under the terms of either the MIT license or GPL.
+ * 
+ * This License is also included in this distribution in the file called 
+ * "MIT_COPYING".
+ *
+ *****************************************************************************/
+
+#ifndef _DX_INFRA_API_
+#define _DX_INFRA_API_
+
+#include "tee_internal_api.h"
+#ifdef CC_DRIVER
+#include "dx_pal_types.h"
+#endif
+/**
+ * @ingroup dx_infra_api
+ * ÎÞ·ûºÅÕûÐÍ¶¨Òå
+ */
+typedef unsigned int              DxUint32;
+/**
+ * @ingroup dx_infra_api
+ * ÎÞ·ûºÅ×Ö·ûÐÍ¶¨Òå
+ */
+typedef unsigned char             DxByte;
+
+#ifndef CC_DRIVER
+/**
+ * @ingroup dx_infra_api
+ * ·µ»Ø½á¹û¶¨Òå
+ */
+typedef TEE_Result                 DxStatus;
+/**
+ * @ingroup dx_infra_api
+ * ×´Ì¬Ã¶¾Ù¶¨Òå
+ */
+typedef enum {
+    DX_FALSE = 0,
+    DX_TRUE = 1
+} DxBool;
+#else
+/**
+ * @ingroup dx_infra_api
+ * ×´Ì¬²¼¶û¶¨Òå
+ */
+typedef DxBool_t DxBool;
+#endif
+/**
+ * @ingroup dx_infra_api
+ * Á¬½Ó×´Ì¬Ã¶¾Ù¶¨Òå
+ */
+typedef enum{
+    CONNECTED = 0,              /**< 0 ÒÑÁ¬½Ó */
+    UNCONNECTED                 /**< 1 Î´Á¬½Ó */
+} EDxTzConnectionStatus_t;
+/**
+ * @ingroup dx_infra_api
+ * °²È«ÄÚ´æ±êÖ¾Î» 0:½ö°²È«·ÃÎÊ;1:·Ç°²È«ºÍ°²È«¶¼ÄÜ·ÃÎÊ
+ */
+typedef enum{
+    INIT = 0,                   /**< 0 ÉèÖÃÄÚ´æÎª½ö°²È«·ÃÎÊ */
+    TERMINATE                   /**< 1 ÉèÖÃÄÚ´æÎª°²È«ºÍ·Ç°²È«¶¼ÄÜ·ÃÎÊ */
+} CP_Flag;
+/**
+ * @ingroup dx_infra_api
+ * °²È«ÄÚ´æÊý¾Ý½á¹¹¶¨Òå
+ */
+typedef struct{
+    DxByte*     addr;           /**< ¹²ÏíÄÚ´æµØÖ· */
+    DxUint32    size;           /**< ¹²ÏíÄÚ´æ³¤¶È */
+    CP_Flag     flag;           /**< ¹²ÏíÄÚ´æ±êÊ¶ */
+} ContentPath;
+/**
+ * @ingroup dx_infra_api
+ * °²È«ÄÚ´æµÄÊý¾ÝºÍµØÖ·¶¼ÐèÒª32KB¶ÔÆë
+ */
+#define ALIGN_SIZE 0x8000 //32KB
+/**
+ * @ingroup  dx_infra_api
+ * @brief g_dx_content_path_addr ÐÞ¸ÄDX°²È«ÄÚ´æµØÖ·È«¾Ö±äÁ¿
+ *
+ * @par ÃèÊö:
+ * DX°²È«ÄÚ´æÍ¨¹ýÈ«¾Ö±äÁ¿¹ÜÀíµØÖ·£¬¸Ã½Ó¿Ú»á¶ÔÈ«¾Ö±äÁ¿½øÐÐÐÞ¸Ä
+ *
+ * @attention È«¾Ö±äÁ¿å£(¹²ÏíÄÚ´æ)Ö»ÓÐÒ»¸ö£¬²»Ö§³Ö²¢·¢²Ù×÷
+ * @param contentpath [IN]  °²È«ÄÚ´æÊý¾Ý½á¹¹ #ContentPath
+ *
+ * @retval #DX_FALSE È«¾Ö±äÁ¿¸³ÖµÊ§°Ü
+ * @retval #DX_TRUE È«¾Ö±äÁ¿¸³Öµ³É¹¦
+ *
+ * @par ÒÀÀµ:
+ * @li dx_infra_api DX¹¦ÄÜAPI
+ * @li tee_internal_api.h TEE¹«¹²Êý¾Ý¶¨Òå
+ * @see DxTzService_InitSecureContentPath | DxTzService_TerminateSecureContentPath | DxTzService_IsSecureContentMemory
+ * @since V100R002C00B302
+*/
+DxBool g_dx_content_path_addr(ContentPath *contentpath);
+/**
+ * @ingroup  dx_infra_api
+ * @brief DxTzService_IsDeviceRooted ´Ó°²È«²à¼ì²éÉè±¸ÊÇ·ñ±»root
+ *
+ * @par ÃèÊö:
+ * ´Ó°²È«²à¼ì²éÉè±¸ÊÇ·ñ±»root£¬Èç¹û±»rootÔòÓµÓÐrootÈ¨ÏÞ
+ *
+ * @attention ÎÞ
+ * @param ÎÞ
+ *
+ * @retval 0 Ã»ÓÐroot
+ * @retval 1 ÒÑ¾­root
+ *
+ * @par ÒÀÀµ:
+ * @li dx_infra_api DX¹¦ÄÜAPI
+ * @li tee_internal_api.h TEE¹«¹²Êý¾Ý¶¨Òå
+ * @see ÎÞ
+ * @since V100R002C00B302
+*/
+DxUint32  DxTzService_IsDeviceRooted(void);
+/**
+ * @ingroup  dx_infra_api
+ * @brief DxTzService_IsBootLoaderUnlocked ´Ó°²È«²à¼ì²éÉè±¸bootloaderÊÇ·ñ±»½âËø
+ *
+ * @par ÃèÊö:
+ * ´Ó°²È«²à¼ì²éÉè±¸bootloaderÊÇ·ñ±»½âËø£¬½âËøºóµÄbootloader¿ÉÒÔÓÃÀ´ÉÕÂ¼µÚÈý·½rom
+ *
+ * @attention ÎÞ
+ * @param ÎÞ
+ *
+ * @retval 0 bootloaderÎ´½âËø
+ * @retval 1 bootloaderÒÑ½âËø
+ *
+ * @par ÒÀÀµ:
+ * @li dx_infra_api DX¹¦ÄÜAPI
+ * @li tee_internal_api.h TEE¹«¹²Êý¾Ý¶¨Òå
+ * @see ÎÞ
+ * @since V100R002C00B302
+*/
+DxUint32  DxTzService_IsBootLoaderUnlocked(void);
+/**
+ * @ingroup  dx_infra_api
+ * @brief DxTzService_InitSecureContentPath ÉèÖÃ·Ç°²È«²à´«µÝµÄÄÚ´æÎª½ö°²È«·ÃÎÊ
+ *
+ * @par ÃèÊö:
+ * ÉèÖÃ·Ç°²È«²à´«µÝµÄÄÚ´æÎª½ö°²È«·ÃÎÊ£¬·Ç°²È«²»ÄÜ·ÃÎÊ¸ÃµØÖ·
+ *
+ * @attention ÎÞ
+ * @param ÎÞ
+ *
+ * @retval #TEE_SUCCESS °²È«±êÖ¾Î»ÉèÖÃ³É¹¦
+ * @retval #TEE_ERROR_BAD_PARAMETERS ²ÎÊý´íÎó
+ *
+ * @par ÒÀÀµ:
+ * @li dx_infra_api DX¹¦ÄÜAPI
+ * @li tee_internal_api.h TEE¹«¹²Êý¾Ý¶¨Òå
+ * @see DxTzService_TerminateSecureContentPath | DxTzService_IsSecureContentMemory
+ * @since V100R002C00B302
+*/
+DxStatus DxTzService_InitSecureContentPath(void);
+/**
+ * @ingroup  dx_infra_api
+ * @brief DxTzService_TerminateSecureContentPath ÉèÖÃ·Ç°²È«²à´«µÝµÄÄÚ´æÎª°²È«ºÍ·Ç°²È«¶¼ÄÜ·ÃÎÊ
+ *
+ * @par ÃèÊö:
+ * ÉèÖÃ·Ç°²È«²à´«µÝµÄÄÚ´æÎª°²È«ºÍ·Ç°²È«¶¼ÄÜ·ÃÎÊ£¬°²È«²à»¹»Ø°²È«ÄÚ´æ£¬Ê¹µÃ·Ç°²È«²à¿ÉÒÔÊÍ·Å
+ *
+ * @attention ÎÞ
+ * @param ÎÞ
+ *
+ * @retval #TEE_SUCCESS °²È«±êÖ¾Î»ÉèÖÃ³É¹¦
+ * @retval #TEE_ERROR_BAD_PARAMETERS ²ÎÊý´íÎó
+ *
+ * @par ÒÀÀµ:
+ * @li dx_infra_api DX¹¦ÄÜAPI
+ * @li tee_internal_api.h TEE¹«¹²Êý¾Ý¶¨Òå
+ * @see DxTzService_InitSecureContentPath | DxTzService_IsSecureContentMemory
+ * @since V100R002C00B302
+*/
+DxStatus DxTzService_TerminateSecureContentPath(void);
+/**
+ * @ingroup  dx_infra_api
+ * @brief DxTzService_IsSecureContentMemory ÔÚ°²È«²à¼ì²éÒ»¶ÎÄÚ´æÊÇ·ñÎª½ö°²È«·ÃÎÊ
+ *
+ * @par ÃèÊö:
+ * ÔÚ°²È«²à¼ì²éÒ»¶ÎÄÚ´æÊÇ·ñÎª½ö°²È«·ÃÎÊ
+ *
+ * @attention ÎÞ
+ * @param mem [IN] ÄÚ´æµØÖ· #DxByte
+ * @param len [IN] ÄÚ´æ³¤¶È #DxUint32
+ *
+ * @retval #TEE_SUCCESS °²È«±êÖ¾Î»ÉèÖÃ³É¹¦
+ * @retval #TEE_ERROR_BAD_PARAMETERS ²ÎÊý´íÎó
+ *
+ * @par ÒÀÀµ:
+ * @li dx_infra_api DX¹¦ÄÜAPI
+ * @li tee_internal_api.h TEE¹«¹²Êý¾Ý¶¨Òå
+ * @see DxTzService_InitSecureContentPath | DxTzService_IsSecureContentMemory
+ * @since V100R002C00B302
+*/
+DxBool DxTzService_IsSecureContentMemory(DxByte* mem, DxUint32 len);
+#endif
+
