@@ -30,7 +30,7 @@
 #include <linux/debugfs.h>
 
 #include "dts_eagle_drv.h"
-#include "hisi/hifidsp/hifi_lpp.h"
+#include <../../../hisi/hifidsp/hifi_lpp.h>
 
 #define DTS_EAGLE_DRIVER_FIRST_MINOR    1
 #define DTS_EAGLE_DRIVER_MINOR_CNT      4

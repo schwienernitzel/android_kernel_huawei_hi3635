@@ -20,7 +20,7 @@
 #include <linux/irqreturn.h>
 #include <linux/interrupt.h>
 #include <linux/gpio.h>
-#include <huawei_platform/dsm/dsm_pub.h>
+#include <dsm/dsm_pub.h>
 
 #include "max98925.h"
 #define SUPPORT_DEVICE_TREE
@@ -764,7 +764,7 @@ static int max98925_do_ioctl(struct file *file, unsigned int cmd,
 			return -1;
 		}
 		break;
-#if 0
+
 	case M98925_SET_VOLUME:
 		ret = get_user(value, pUser);
 		ret |= regmap_write(max98925->regmapL, MAX98925_R02D_GAIN, value);
@@ -773,7 +773,7 @@ static int max98925_do_ioctl(struct file *file, unsigned int cmd,
 		}
 		pr_info("%s:  maxim smartpa set volume: 0x%x\n", __func__, value);
 		break;
-#endif
+
 	case M98925_GET_DAICLOCK:
 		ret = regmap_read(max98925->regmapL, MAX98925_R01B_DAI_CLK_MODE2, &value);
 		ret |= put_user(value, pUser);
@@ -810,6 +810,7 @@ static int max98925_do_ioctl(struct file *file, unsigned int cmd,
 			return -1;
 		}
 		break;
+
 	case M98925_SET_DAIFORMAT:
 		ret = get_user(value, pUser);
 		pr_info("%s: maxim smartpa set daiformat: 0x%x\n",__func__, value);
@@ -819,7 +820,6 @@ static int max98925_do_ioctl(struct file *file, unsigned int cmd,
 		}
 		break;
 #endif
-
 	case M98925_GET_BOOSTVOLT:
 		ret = regmap_read(max98925->regmapL, MAX98925_R037_CONFIGURATION, &value);
 		ret |= put_user(value, pUser);
