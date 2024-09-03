@@ -53,7 +53,7 @@
 #include <linux/huawei/hw_connectivity.h>
 #endif
 #ifdef  CONFIG_HUAWEI_DSM
-#include <huawei_platform/dsm/dsm_pub.h>
+#include <dsm/dsm_pub.h>
 #endif
 /* Common flag combinations */
 #define DW_MCI_DATA_ERROR_FLAGS	(SDMMC_INT_DTO | SDMMC_INT_DCRC | \
@@ -1593,6 +1593,26 @@ int dw_mci_start_signal_voltage_switch(struct mmc_host *mmc,
     return err;
 }
 
+#ifdef CONFIG_MMC_PASSWORDS
+static int dw_mci_sd_lock_reset(struct mmc_host *mmc)
+{
+	struct dw_mci_slot *slot = mmc_priv(mmc);
+	struct dw_mci *host = slot->host;
+	const struct dw_mci_drv_data *drv_data = slot->host->drv_data;
+	u32 present = 0;
+
+	pm_runtime_get_sync(mmc_dev(mmc));
+	present = dw_mci_get_cd(mmc);
+	if (present == 1) {
+		if (drv_data && drv_data->work_fail_reset)
+			drv_data->work_fail_reset(host);
+	}
+	pm_runtime_mark_last_busy(mmc_dev(mmc));
+	pm_runtime_put_autosuspend(mmc_dev(mmc));
+
+	return 0;
+}
+#endif
 static const struct mmc_host_ops dw_mci_ops = {
 	.request		= dw_mci_request,
 	.pre_req		= dw_mci_pre_req,
@@ -1611,16 +1631,24 @@ static const struct mmc_host_ops dw_mci_ops = {
 #ifdef CONFIG_HI110X_WIFI_ENABLE
 	.init_card  = mshci_init_card,
 #endif
+#ifdef CONFIG_MMC_PASSWORDS
+	.sd_lock_reset		= dw_mci_sd_lock_reset,
+#endif
 };
 
 #ifdef CONFIG_HUAWEI_EMMC_DSM
 static inline void dw_mci_dsm_host_error_filter(struct dw_mci *host, struct mmc_request *mrq, u32 *error_bits) {
 	if (mrq->data && mrq->data->flags & MMC_DATA_WRITE)
 		*error_bits &= ~SDMMC_INT_SBE;
-	else if (mrq->cmd) {
-		if ((mrq->cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200) ||
-			((host->cur_slot->mmc->f_init <= 400000UL) && ((mrq->cmd->opcode == SD_IO_RW_DIRECT) || (mrq->cmd->opcode == SD_SEND_IF_COND) || (mrq->cmd->opcode == SD_IO_SEND_OP_COND) || (mrq->cmd->opcode == MMC_APP_CMD))))
+	if (mrq->cmd) {
+		if (mrq->cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200)
 			*error_bits = 0;
+		else if (host->cur_slot->mmc->ios.clock <= 400000UL) {
+			if (((mrq->cmd->opcode == SD_IO_RW_DIRECT) || (mrq->cmd->opcode == SD_SEND_IF_COND) || (mrq->cmd->opcode == SD_IO_SEND_OP_COND) || (mrq->cmd->opcode == MMC_APP_CMD)))
+				*error_bits = 0;
+			else if (mrq->cmd->opcode == MMC_SEND_STATUS)
+				*error_bits &= ~(SDMMC_INT_RCRC | SDMMC_INT_RESP_ERR);
+		}
 	}
 }
 #endif

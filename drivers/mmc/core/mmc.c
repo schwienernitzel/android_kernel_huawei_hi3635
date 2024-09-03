@@ -1434,7 +1434,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
 		if (card->ext_csd.rev >= 7) {
 			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
 					EXT_CSD_EXP_EVENTS_CTRL,
-					EXT_CSD_DYNCAP_EVENT_EN | EXT_CSD_SYSPOOL_EVENT_EN,
+					EXT_CSD_DYNCAP_EVENT_EN,
 					card->ext_csd.generic_cmd6_time);
 			if (err) {
 				pr_warn("%s: Enabling dyncap and syspool event failed\n",
@@ -1775,6 +1775,10 @@ static const struct mmc_bus_ops mmc_ops = {
 	.sleep = mmc_sleep,
 	.remove = mmc_remove,
 	.detect = mmc_detect,
+#ifdef CONFIG_MMC_PASSWORDS
+	.sysfs_add = NULL,
+	.sysfs_remove = NULL,
+#endif
 	.suspend = NULL,
 	.resume = NULL,
 	.power_restore = mmc_power_restore,
