@@ -1248,10 +1248,14 @@ wl_validate_wps_ie(char *wps_ie, s32 wps_ie_len, bool *pbc)
 			WL_DBG(("  attr WPS_ID_CONFIG_METHODS: %x\n", HTON16(val)));
 		} else if (subelt_id == WPS_ID_DEVICE_NAME) {
 			char devname[100];
-			memcpy(devname, subel, subelt_len);
-			devname[subelt_len] = '\0';
-			WL_DBG(("  attr WPS_ID_DEVICE_NAME: %s (len %u)\n",
-				devname, subelt_len));
+			size_t namelen = MIN(subelt_len, sizeof(devname-1));
+			if (namelen) {
+				memcpy(devname, subel, namelen);
+				devname[namelen] = '\0';
+				WL_DBG(("  attr WPS_ID_DEVICE_NAME: %s (len %u)\n",
+					devname, subelt_len));
+			}
+
 		} else if (subelt_id == WPS_ID_DEVICE_PWD_ID) {
 			valptr[0] = *subel;
 			valptr[1] = *(subel + 1);
@@ -2200,8 +2204,11 @@ static void wl_scan_prep(struct wl_scan_params *params, struct cfg80211_scan_req
 		ptr = (char*)params + offset;
 		for (i = 0; i < n_ssids; i++) {
 			memset(&ssid, 0, sizeof(wlc_ssid_t));
-			ssid.SSID_len = MIN(request->ssids[i].ssid_len,
-					    DOT11_MAX_SSID_LEN);
+#ifdef BCM_PATCH_CVE_2016_2493
+			ssid.SSID_len = min(request->ssids[i].ssid_len, DOT11_MAX_SSID_LEN);
+#else
+			ssid.SSID_len = request->ssids[i].ssid_len;
+#endif
 			memcpy(ssid.SSID, request->ssids[i].ssid, ssid.SSID_len);
 			if (!ssid.SSID_len)
 				WL_SCAN(("%d: Broadcast scan\n", i));
@@ -2358,15 +2365,6 @@ wl_run_escan(struct bcm_cfg80211 *cfg, struct net_device *ndev,
 			if (!wl_get_valid_channels(ndev, chan_buf, sizeof(chan_buf))) {
 				list = (wl_uint32_list_t *) chan_buf;
 				n_valid_chan = dtoh32(list->count);
-
-				if (n_valid_chan > WL_NUMCHANNELS) {
-					WL_ERR(("wrong n_valid_chan:%d\n",
-						n_valid_chan));
-					kfree(default_chan_list);
-					err = -EINVAL;
-					goto exit;
-				}
-
 				for (i = 0; i < num_chans; i++)
 				{
 #ifdef WL_HOST_BAND_MGMT
@@ -2398,9 +2396,6 @@ wl_run_escan(struct bcm_cfg80211 *cfg, struct net_device *ndev,
 						/* allows only supported channel on
 						*  current reguatory
 						*/
-						if (n_nodfs >= num_chans)
-							break;
-
 						if (channel == (dtoh32(list->element[j])))
 							default_chan_list[n_nodfs++] =
 								channel;
@@ -3394,8 +3389,12 @@ wl_cfg80211_join_ibss(struct wiphy *wiphy, struct net_device *dev,
 	WL_TRACE(("In\n"));
 	RETURN_EIO_IF_NOT_UP(cfg);
 	WL_INFORM(("JOIN BSSID:" MACDBG "\n", MAC2STRDBG(params->bssid)));
+#ifdef BCM_PATCH_CVE_2016_2493
 	if (!params->ssid || params->ssid_len <= 0 ||
-		params->ssid_len >  DOT11_MAX_SSID_LEN) {
+		params->ssid_len > DOT11_MAX_SSID_LEN) {
+#else
+	if (!params->ssid || params->ssid_len <= 0) {
+#endif
 		WL_ERR(("Invalid parameter\n"));
 		return -EINVAL;
 	}
@@ -5286,6 +5285,7 @@ static s32 wl_cfg80211_resume(struct wiphy *wiphy)
 #endif
 	if (unlikely(!wl_get_drv_status(cfg, READY, ndev))) {
 		WL_INFORM(("device is not ready\n"));
+		HW_PRINT((WIFI_TAG"%s -\n", __FUNCTION__));
 		return 0;
 	}
 
@@ -5293,6 +5293,7 @@ static s32 wl_cfg80211_resume(struct wiphy *wiphy)
 	hw_resched_dpc_ifneed(ndev);
 #endif
 
+	HW_PRINT((WIFI_TAG"%s -\n", __FUNCTION__));
 	return err;
 }
 
@@ -5302,6 +5303,7 @@ static s32 wl_cfg80211_suspend(struct wiphy *wiphy, struct cfg80211_wowlan *wow)
 static s32 wl_cfg80211_suspend(struct wiphy *wiphy)
 #endif
 {
+	HW_PRINT((WIFI_TAG"%s +\n", __FUNCTION__));
 #ifdef DHD_CLEAR_ON_SUSPEND
 	struct bcm_cfg80211 *cfg = wiphy_priv(wiphy);
 	struct net_info *iter, *next;
@@ -5311,6 +5313,7 @@ static s32 wl_cfg80211_suspend(struct wiphy *wiphy)
 	if (unlikely(!wl_get_drv_status(cfg, READY, ndev))) {
 		WL_INFORM(("device is not ready : status (%d)\n",
 			(int)cfg->status));
+		HW_PRINT((WIFI_TAG"%s -\n", __FUNCTION__));
 		return 0;
 	}
 	for_each_ndev(cfg, iter, next)
@@ -7273,16 +7276,28 @@ static s32 wl_cfg80211_bcn_set_params(
 	}
 
 	if ((info->ssid) && (info->ssid_len > 0) &&
+#ifdef BCM_PATCH_CVE_2016_2493
 		(info->ssid_len <= DOT11_MAX_SSID_LEN)) {
+#else
+		(info->ssid_len <= 32)) {
+#endif
 		WL_DBG(("SSID (%s) len:%zd \n", info->ssid, info->ssid_len));
 		if (dev_role == NL80211_IFTYPE_AP) {
 			/* Store the hostapd SSID */
+#ifdef BCM_PATCH_CVE_2016_2493
 			memset(cfg->hostapd_ssid.SSID, 0x00, DOT11_MAX_SSID_LEN);
+#else
+			memset(cfg->hostapd_ssid.SSID, 0x00, 32);
+#endif
 			memcpy(cfg->hostapd_ssid.SSID, info->ssid, info->ssid_len);
 			cfg->hostapd_ssid.SSID_len = info->ssid_len;
 		} else {
 				/* P2P GO */
+#ifdef BCM_PATCH_CVE_2016_2493
 			memset(cfg->p2p->ssid.SSID, 0x00, DOT11_MAX_SSID_LEN);
+#else
+			memset(cfg->p2p->ssid.SSID, 0x00, 32);
+#endif
 			memcpy(cfg->p2p->ssid.SSID, info->ssid, info->ssid_len);
 			cfg->p2p->ssid.SSID_len = info->ssid_len;
 		}
@@ -7430,11 +7445,18 @@ wl_cfg80211_bcn_bringup_ap(
 		memset(&join_params, 0, sizeof(join_params));
 		/* join parameters starts with ssid */
 		join_params_size = sizeof(join_params.ssid);
-		join_params.ssid.SSID_len = MIN(cfg->hostapd_ssid.SSID_len,
+#ifdef BCM_PATCH_CVE_2016_2493
+		join_params.ssid.SSID_len = min(cfg->hostapd_ssid.SSID_len,
 			(uint32)DOT11_MAX_SSID_LEN);
+#endif
 		memcpy(join_params.ssid.SSID, cfg->hostapd_ssid.SSID,
+#ifdef BCM_PATCH_CVE_2016_2493
 			join_params.ssid.SSID_len);
 		join_params.ssid.SSID_len = htod32(join_params.ssid.SSID_len);
+#else
+			cfg->hostapd_ssid.SSID_len);
+		join_params.ssid.SSID_len = htod32(cfg->hostapd_ssid.SSID_len);
+#endif
 
 		/* create softap */
 		if ((err = wldev_ioctl(dev, WLC_SET_SSID, &join_params,
@@ -8092,18 +8114,28 @@ wl_cfg80211_add_set_beacon(struct wiphy *wiphy, struct net_device *dev,
 		DOT11_MNG_SSID_ID)) != NULL) {
 		if (dev_role == NL80211_IFTYPE_AP) {
 			/* Store the hostapd SSID */
+#ifdef BCM_PATCH_CVE_2016_2493
 			memset(&cfg->hostapd_ssid.SSID[0], 0x00, DOT11_MAX_SSID_LEN);
-			cfg->hostapd_ssid.SSID_len = MIN(ssid_ie->len,
-							 DOT11_MAX_SSID_LEN);
+			cfg->hostapd_ssid.SSID_len = min(ssid_ie->len, DOT11_MAX_SSID_LEN);
 			memcpy(&cfg->hostapd_ssid.SSID[0], ssid_ie->data,
 				cfg->hostapd_ssid.SSID_len);
+#else
+			memset(&cfg->hostapd_ssid.SSID[0], 0x00, 32);
+			memcpy(&cfg->hostapd_ssid.SSID[0], ssid_ie->data, ssid_ie->len);
+			cfg->hostapd_ssid.SSID_len = ssid_ie->len;
+#endif
 		} else {
 				/* P2P GO */
+#ifdef BCM_PATCH_CVE_2016_2493
 			memset(&cfg->p2p->ssid.SSID[0], 0x00, DOT11_MAX_SSID_LEN);
-			cfg->p2p->ssid.SSID_len = MIN(ssid_ie->len,
-						      DOT11_MAX_SSID_LEN);
+			cfg->p2p->ssid.SSID_len = min(ssid_ie->len, DOT11_MAX_SSID_LEN);
 			memcpy(cfg->p2p->ssid.SSID, ssid_ie->data,
 				cfg->p2p->ssid.SSID_len);
+#else
+			memset(&cfg->p2p->ssid.SSID[0], 0x00, 32);
+			memcpy(cfg->p2p->ssid.SSID, ssid_ie->data, ssid_ie->len);
+			cfg->p2p->ssid.SSID_len = ssid_ie->len;
+#endif
 		}
 	}
 
@@ -8228,9 +8260,8 @@ wl_cfg80211_sched_scan_start(struct wiphy *wiphy,
 	if (request->n_match_sets > 0) {
 		for (i = 0; i < request->n_match_sets; i++) {
 			ssid = &request->match_sets[i].ssid;
-			ssids_local[i].SSID_len = MIN(ssid->ssid_len,
-											(uint32)DOT11_MAX_SSID_LEN);
-			memcpy(ssids_local[i].SSID, ssid->ssid, ssids_local[i].SSID_len);
+			memcpy(ssids_local[i].SSID, ssid->ssid, ssid->ssid_len);
+			ssids_local[i].SSID_len = ssid->ssid_len;
 			WL_PNO((">>> PNO filter set for ssid (%s) \n", ssid->ssid));
 			ssid_count++;
 		}
@@ -9894,12 +9925,8 @@ wl_notify_pfn_status(struct bcm_cfg80211 *cfg, bcm_struct_cfgdev *cfgdev,
 {
 	struct net_device *ndev = NULL;
 
-	if (!data) {
-		WL_ERR(("Data is NULL!\n"));
-		return 0;
-	}
+	WL_ERR((">>> PNO Event\n"));
 
-	WL_DBG((">>> PNO Event\n"));
 	ndev = cfgdev_to_wlc_ndev(cfgdev, cfg);
 
 #ifndef WL_SCHED_SCAN
@@ -10305,8 +10332,13 @@ wl_notify_sched_scan_results(struct bcm_cfg80211 *cfg, struct net_device *ndev,
 
 	WL_DBG(("Enter\n"));
 
-	if (e->event_type == WLC_E_PFN_NET_LOST) {
-		WL_PNO(("PFN NET LOST event. Do Nothing \n"));
+	if ((e->event_type == WLC_E_PFN_NET_LOST) || !data) {
+		WL_PNO(("Do Nothing %d\n", e->event_type));
+		return 0;
+	}
+	if (pfn_result->version != PFN_SCANRESULT_VERSION) {
+		WL_ERR(("Incorrect version %d, expected %d\n", pfn_result->version,
+		       PFN_SCANRESULT_VERSION));
 		return 0;
 	}
 	WL_PNO((">>> PFN NET FOUND event. count:%d \n", n_pfn_results));
@@ -10349,9 +10381,9 @@ wl_notify_sched_scan_results(struct bcm_cfg80211 *cfg, struct net_device *ndev,
 			 * scan request in the form of cfg80211_scan_request. For timebeing, create
 			 * cfg80211_scan_request one out of the received PNO event.
 			 */
+			ssid[i].ssid_len = MIN(DOT11_MAX_SSID_LEN, netinfo->pfnsubnet.SSID_len);
 			memcpy(ssid[i].ssid, netinfo->pfnsubnet.SSID,
-				netinfo->pfnsubnet.SSID_len);
-			ssid[i].ssid_len = netinfo->pfnsubnet.SSID_len;
+			       ssid[i].ssid_len);
 			request->n_ssids++;
 
 			channel_req = netinfo->pfnsubnet.channel;
@@ -12605,9 +12637,13 @@ wl_update_prof(struct bcm_cfg80211 *cfg, struct net_device *ndev,
 		ssid = (wlc_ssid_t *) data;
 		memset(profile->ssid.SSID, 0,
 			sizeof(profile->ssid.SSID));
-		profile->ssid.SSID_len = MIN(ssid->SSID_len,
-					     DOT11_MAX_SSID_LEN);
+#ifdef BCM_PATCH_CVE_2016_2493
+		profile->ssid.SSID_len = min(ssid->SSID_len, DOT11_MAX_SSID_LEN);
 		memcpy(profile->ssid.SSID, ssid->SSID, profile->ssid.SSID_len);
+#else
+		memcpy(profile->ssid.SSID, ssid->SSID, ssid->SSID_len);
+		profile->ssid.SSID_len = ssid->SSID_len;
+#endif
 		break;
 	case WL_PROF_BSSID:
 		if (data)
@@ -12690,9 +12726,12 @@ static __used s32 wl_add_ie(struct bcm_cfg80211 *cfg, u8 t, u8 l, u8 *v)
 static void wl_update_hidden_ap_ie(struct wl_bss_info *bi, u8 *ie_stream, u32 *ie_size, bool roam)
 {
 	u8 *ssidie;
-	int32 ssid_len = MIN(bi->SSID_len, DOT11_MAX_SSID_LEN);
+#ifdef BCM_PATCH_CVE_2016_2493
+	int32 ssid_len = min(bi->SSID_len, DOT11_MAX_SSID_LEN);
 	int32 remaining_ie_buf_len, available_buffer_len;
+#endif
 	ssidie = (u8 *)cfg80211_find_ie(WLAN_EID_SSID, ie_stream, *ie_size);
+#ifdef BCM_PATCH_CVE_2016_2493
 	/* ERROR out if
 	 * 1. No ssid IE is FOUND or
 	 * 2. New ssid length is > what was allocated for existing ssid (as
@@ -12700,33 +12739,56 @@ static void wl_update_hidden_ap_ie(struct wl_bss_info *bi, u8 *ie_stream, u32 *i
 	 * 3. If in case of erroneous buffer input where ssid length doesnt match the space
 	 * allocated to it.
 	 */
-	if (!ssidie) {
+#endif
+	if (!ssidie)
 		return;
-	}
+#ifdef BCM_PATCH_CVE_2016_2493
 	available_buffer_len = ((int)(*ie_size)) - (ssidie + 2 - ie_stream);
 	remaining_ie_buf_len = available_buffer_len - (int)ssidie[1];
 	if ((ssid_len > ssidie[1]) ||
 		(ssidie[1] > available_buffer_len)) {
 		return;
-	}
+		}
+
+#endif
+
+#ifdef BCM_PATCH_CVE_2016_2493
 	if (ssidie[1] != ssid_len) {
+#else
+	if (ssidie[1] != bi->SSID_len) {
+#endif
 		if (ssidie[1]) {
 			WL_ERR(("%s: Wrong SSID len: %d != %d\n",
 				__FUNCTION__, ssidie[1], bi->SSID_len));
 		}
 		if (roam) {
 			WL_ERR(("Changing the SSID Info.\n"));
+#ifdef BCM_PATCH_CVE_2016_2493
 			memmove(ssidie + ssid_len + 2,
+#else
+			memmove(ssidie + bi->SSID_len + 2,
+#endif
 				(ssidie + 2) + ssidie[1],
+#ifdef BCM_PATCH_CVE_2016_2493
 				remaining_ie_buf_len);
 			memcpy(ssidie + 2, bi->SSID, ssid_len);
 			*ie_size = *ie_size + ssid_len - ssidie[1];
 			ssidie[1] = ssid_len;
+#else
+				*ie_size - (ssidie + 2 + ssidie[1] - ie_stream));
+			memcpy(ssidie + 2, bi->SSID, bi->SSID_len);
+			*ie_size = *ie_size + bi->SSID_len - ssidie[1];
+			ssidie[1] = bi->SSID_len;
+#endif
 		}
 		return;
 	}
 	if (*(ssidie + 2) == '\0')
-		 memcpy(ssidie + 2, bi->SSID, ssid_len);
+#ifdef BCM_PATCH_CVE_2016_2493
+		memcpy(ssidie + 2, bi->SSID, ssid_len);
+#else
+		 memcpy(ssidie + 2, bi->SSID, bi->SSID_len);
+#endif
 	return;
 }
 
@@ -14464,10 +14526,6 @@ wl_cfg80211_add_iw_ie(struct bcm_cfg80211 *cfg, struct net_device *ndev, s32 bss
 	if (ie_id != DOT11_MNG_INTERWORKING_ID)
 		return BCME_UNSUPPORTED;
 
-	if (data_len > IW_IES_MAX_BUF_LEN) {
-		WL_ERR(("wrong data_len:%d\n", data_len));
-		return BCME_BADARG;
-	}
 	/* Validate the pktflag parameter */
 	if ((pktflag & ~(VNDR_IE_BEACON_FLAG | VNDR_IE_PRBRSP_FLAG |
 	            VNDR_IE_ASSOCRSP_FLAG | VNDR_IE_AUTHRSP_FLAG |

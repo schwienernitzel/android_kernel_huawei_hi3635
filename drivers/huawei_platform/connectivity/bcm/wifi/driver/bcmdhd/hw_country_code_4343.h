@@ -26,7 +26,7 @@ const struct cntry_locales_custom hw_translate_custom_table[] = {
     {"CH", "CH", 1},
     {"CY", "CY", 1},
     {"CZ", "CZ", 1},
-    {"DE", "DE", 7},
+    {"DE", "DE", 3},
     {"DK", "DK", 1},
     {"EE", "EE", 1},
     {"ES", "ES", 1},

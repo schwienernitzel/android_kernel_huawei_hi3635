@@ -188,6 +188,8 @@ enum SYS_NV_ID_ENUM
 
 /*   2335*/     en_NV_Item_LTE_OOS_2G_PREF_PLMN_SEL_CFG = 2335,
 
+/*  2336 */     en_NV_Item_Ipv6_Address_Test_Mode_Cfg = 2336,                   /* IPV6地址测试模式配置，0x55AA55AA为测试模式，其他值为正常模式 */
+/*  2340 */     en_NV_Item_Ccwa_Ctrl_Mode                   = 2340,
 /*  2354 */     en_NV_Item_ADS_WAKE_LOCK_CFG = 2354,                            /* ADS WAKELOCK 配置 */
 
 /*   3000*/      en_NV_Item_ErrLog_CsHo_Len = 3000,

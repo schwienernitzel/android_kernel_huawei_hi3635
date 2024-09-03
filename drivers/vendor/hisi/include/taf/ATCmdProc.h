@@ -1262,6 +1262,10 @@ typedef enum
 
     AT_CMD_NVWRSECCTRL,
 
+    /* Added by z00301431 for ACT_PDP_STUB, 2015-11-4, begin */
+    AT_CMD_ACTPDPSTUB,
+    /* Added by z00301431 for ACT_PDP_STUB, 2015-11-4, end */
+
     AT_CMD_COMM_BUTT,
 
 }AT_CMD_INDEX_ENUM;

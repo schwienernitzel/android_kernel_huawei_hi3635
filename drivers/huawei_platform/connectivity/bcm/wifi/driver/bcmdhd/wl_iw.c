@@ -2394,7 +2394,7 @@ wl_iw_get_essid(
 		return error;
 	}
 
-	ssid.SSID_len = dtoh32(ssid.SSID_len);
+	ssid.SSID_len = MIN(dtoh32(ssid.SSID_len), IW_ESSID_MAX_SIZE);
 
 	/* Get the current SSID */
 	memcpy(extra, ssid.SSID, ssid.SSID_len);

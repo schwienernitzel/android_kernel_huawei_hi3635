@@ -312,16 +312,11 @@ static int wl_android_get_rssi(struct net_device *net, char *command, int total_
 		return -1;
 	if ((ssid.SSID_len == 0) || (ssid.SSID_len > DOT11_MAX_SSID_LEN)) {
 		DHD_ERROR(("%s: wldev_get_ssid failed\n", __FUNCTION__));
-	} else if (total_len <= ssid.SSID_len) {
-		return -ENOMEM;
 	} else {
 		memcpy(command, ssid.SSID, ssid.SSID_len);
 		bytes_written = ssid.SSID_len;
 	}
-	if ((total_len - bytes_written) < (strlen(" rssi -XXX") + 1))
-		return -ENOMEM;
-	bytes_written += scnprintf(&command[bytes_written], total_len, " rssi %d", rssi);
-	command[bytes_written] = '\0';
+	bytes_written += snprintf(&command[bytes_written], total_len, " rssi %d", rssi);
 	DHD_INFO(("%s: command result is %s (%d)\n", __FUNCTION__, command, bytes_written));
 	return bytes_written;
 }
@@ -436,9 +431,8 @@ wls_parse_batching_cmd(struct net_device *dev, char *command, int total_len)
 					" <> params\n", __FUNCTION__));
 					goto exit;
 				}
-
-				while ((token2 = strsep(&pos2, PNO_PARAM_CHANNEL_DELIMETER))
-						!= NULL) {
+					while ((token2 = strsep(&pos2,
+					PNO_PARAM_CHANNEL_DELIMETER)) != NULL) {
 					if (token2 == NULL || !*token2)
 						break;
 					if (*token2 == '\0')
@@ -449,20 +443,13 @@ wls_parse_batching_cmd(struct net_device *dev, char *command, int total_len)
 						DHD_PNO(("band : %s\n",
 							(*token2 == 'A')? "A" : "B"));
 					} else {
-						if ((batch_params.nchan >= WL_NUMCHANNELS) ||
-						    (i >= WL_NUMCHANNELS)) {
-							DHD_ERROR(("Too many nchan %d\n",
-								batch_params.nchan));
-							err = BCME_BUFTOOSHORT;
-							goto exit;
-						}
 						batch_params.chan_list[i++] =
-							simple_strtol(token2, NULL, 0);
+						simple_strtol(token2, NULL, 0);
 						batch_params.nchan++;
-						DHD_PNO(("channel: %d\n",
-							batch_params.chan_list[i-1]));
+						DHD_PNO(("channel :%d\n",
+						batch_params.chan_list[i-1]));
 					}
-				}
+				 }
 			} else if (!strncmp(param, PNO_PARAM_RTT, strlen(PNO_PARAM_RTT))) {
 				batch_params.rtt = simple_strtol(value, NULL, 0);
 				DHD_PNO(("rtt : %d\n", batch_params.rtt));
@@ -1103,8 +1090,8 @@ wl_android_set_roampref(struct net_device *dev, char *command, int total_len)
 	uint8 buf[MAX_BUF_SIZE];
 	uint8 *pref = buf;
 	char *pcmd;
-	uint num_ucipher_suites;
-	uint num_akm_suites;
+	int num_ucipher_suites = 0;
+	int num_akm_suites = 0;
 	wpa_suite_t ucipher_suites[MAX_NUM_SUITES];
 	wpa_suite_t akm_suites[MAX_NUM_SUITES];
 	int num_tuples = 0;
@@ -1117,10 +1104,6 @@ wl_android_set_roampref(struct net_device *dev, char *command, int total_len)
 	total_len_left = total_len - strlen(CMD_SET_ROAMPREF) + 1;
 
 	num_akm_suites = simple_strtoul(pcmd, NULL, 16);
-	if (num_akm_suites > MAX_NUM_SUITES) {
-		WL_ERR(("wrong num_akm_suites:%d.\n", num_akm_suites));
-		return BCME_ERROR;
-	}
 	/* Increment for number of AKM suites field + space */
 	pcmd += 3;
 	total_len_left -= 3;
@@ -1146,10 +1129,6 @@ wl_android_set_roampref(struct net_device *dev, char *command, int total_len)
 
 	total_len_left -= (num_akm_suites * WIDTH_AKM_SUITE);
 	num_ucipher_suites = simple_strtoul(pcmd, NULL, 16);
-	if (num_ucipher_suites > MAX_NUM_SUITES) {
-		WL_ERR(("wrong num_ucipher_suites:%d.\n", num_ucipher_suites));
-		return BCME_ERROR;
-	}
 	/* Increment for number of cipher suites field + space */
 	pcmd += 3;
 	total_len_left -= 3;
@@ -1866,14 +1845,14 @@ int wl_android_priv_cmd(struct net_device *net, struct ifreq *ifr, int cmd)
 	android_wifi_priv_cmd priv_cmd;
 
 	net_os_wake_lock(net);
-
-	if (!ifr->ifr_data) {
-		ret = -EINVAL;
-		goto exit;
-	}
-
+#ifdef BCM_PATCH_CVE_2016_2475
 	if (!capable(CAP_NET_ADMIN)) {
 		ret = -EPERM;
+		goto exit;
+	}
+#endif
+	if (!ifr->ifr_data) {
+		ret = -EINVAL;
 		goto exit;
 	}
 
@@ -2176,7 +2155,8 @@ int wl_android_priv_cmd(struct net_device *net, struct ifreq *ifr, int cmd)
 	}
 	else {
 		DHD_ERROR(("Unknown PRIVATE command %s - ignored\n", command));
-		bytes_written = scnprintf(command, sizeof("OK"), "OK");
+		snprintf(command, 3, "OK");
+		bytes_written = strlen("OK");
 	}
 
 	if (bytes_written >= 0) {

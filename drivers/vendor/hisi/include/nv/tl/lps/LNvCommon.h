@@ -129,10 +129,10 @@ enum NV_ITEM_ID_ENUM
 
     EN_NV_ID_RF_HW                                  = 0xD242,
     EN_NV_ID_USIM_BEGIN                             = 0xD250,
-    EN_NV_ID_UST_FILE                               = 0xD251,
+    EN_NV_ID_VOLTE_CARD_LOCK                        = 0xD251,
     EN_NV_ID_MNC_LEN_FILE                           = 0xD252,
-    EN_NV_ID_FORBIDDEN_PLMN_LIST_FILE               = 0xD253,
-    EN_NV_ID_UPLMN_SEL_FILE                         = 0xD254,
+    EN_NV_ID_IMSA_COMM_PARA_CONFIG                  = 0xD253,
+    EN_NV_ID_IMS_PARM_UE_CAPABILITY                 = 0xD254,
     EN_NV_ID_OPLMN_SEL_FILE                         = 0xD255,
     EN_NV_ID_HPLMN_PERI_FILE                        = 0xD256,
     EN_NV_ID_SEC_CONTEXT_FILE                       = 0xD257,

@@ -741,13 +741,9 @@ void dhd_os_wd_timer_extend(void *bus, bool extend);
 static int dhd_toe_get(dhd_info_t *dhd, int idx, uint32 *toe_ol);
 static int dhd_toe_set(dhd_info_t *dhd, int idx, uint32 toe_ol);
 #endif /* TOE */
-#if defined (BCM_PATCH_FOR_ETHERTYPE_SECURITY)
+
 static int dhd_wl_host_event(dhd_info_t *dhd, int *ifidx, void *pktdata, uint pktlen,
                              wl_event_msg_t *event_ptr, void **data_ptr);
-#else
-static int dhd_wl_host_event(dhd_info_t *dhd, int *ifidx, void *pktdata,
-                             wl_event_msg_t *event_ptr, void **data_ptr);
-#endif /*BCM_PATCH_FOR_ETHERTYPE_SECURITY*/
 #ifdef DHD_UNICAST_DHCP
 static const uint8 llc_snap_hdr[SNAP_HDR_LEN] = {0xaa, 0xaa, 0x03, 0x00, 0x00, 0x00};
 static int dhd_get_pkt_ip_type(dhd_pub_t *dhd, void *skb, uint8 **data_ptr,
@@ -2796,9 +2792,7 @@ dhd_rx_frame(dhd_pub_t *dhdp, int ifidx, void *pktbuf, int numpkt, uint8 chan)
 #else
 			skb->mac.raw,
 #endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 22) */
-#if defined (BCM_PATCH_FOR_ETHERTYPE_SECURITY)
-            len - 2,
-#endif /*BCM_PATCH_FOR_ETHERTYPE_SECURITY*/
+			len - 2,
 			&event,
 			&data);
 
@@ -4430,9 +4424,9 @@ dhd_allocate_if(dhd_pub_t *dhdpub, int ifidx, char *name,
 	if (ifp != NULL) {
 		if (ifp->net != NULL) {
 			DHD_ERROR(("%s: free existing IF %s\n", __FUNCTION__, ifp->net->name));
-
+#ifndef HW_WIFI_ALLOC_IF_PANIC
 			dhd_dev_priv_clear(ifp->net); /* clear net_device private */
-
+#endif
 			/* in unregister_netdev case, the interface gets freed by net->destructor
 			 * (which is set to free_netdev)
 			 */
@@ -4445,6 +4439,9 @@ dhd_allocate_if(dhd_pub_t *dhdpub, int ifidx, char *name,
 				else
 					unregister_netdevice(ifp->net);
 			}
+#ifdef HW_WIFI_ALLOC_IF_PANIC
+			dhd_dev_priv_clear(ifp->net); /* clear net_device private */
+#endif
 			ifp->net = NULL;
 		}
 	} else {
@@ -5727,7 +5724,12 @@ static int dhd_preinit_config(dhd_pub_t *dhd, int ifidx)
 		goto err;
 
 	buf[stat.size] = '\0';
-	for (p = buf; *p && ((p-buf)<=stat.size); p++) {
+	for (p = buf; *p; p++) {
+#ifdef HW_WIFI_CONFIG_FROM_FILE_BUG
+		if ((p-buf) > stat.size) {
+			break;
+		}
+#endif
 		if (isspace(*p))
 			continue;
 		for (name = p++; *p && !isspace(*p); p++) {
@@ -7779,31 +7781,17 @@ dhd_get_wireless_stats(struct net_device *dev)
 }
 #endif /* defined(WL_WIRELESS_EXT) */
 
-#if defined (BCM_PATCH_FOR_ETHERTYPE_SECURITY)
 static int
 dhd_wl_host_event(dhd_info_t *dhd, int *ifidx, void *pktdata, uint pktlen,
 	wl_event_msg_t *event, void **data)
-#else
-static int
-dhd_wl_host_event(dhd_info_t *dhd, int *ifidx, void *pktdata,
-	wl_event_msg_t *event, void **data)
-#endif /*BCM_PATCH_FOR_ETHERTYPE_SECURITY*/
 {
 	int bcmerror = 0;
 	ASSERT(dhd != NULL);
 
 #ifdef SHOW_LOGTRACE
-#if defined (BCM_PATCH_FOR_ETHERTYPE_SECURITY)
 		bcmerror = wl_host_event(&dhd->pub, ifidx, pktdata, pktlen, event, data, &dhd->event_data);
 #else
-		bcmerror = wl_host_event(&dhd->pub, ifidx, pktdata, event, data, &dhd->event_data);
-#endif/*BCM_PATCH_FOR_ETHERTYPE_SECURITY*/
-#else
-#if defined (BCM_PATCH_FOR_ETHERTYPE_SECURITY)
 		bcmerror = wl_host_event(&dhd->pub, ifidx, pktdata, pktlen, event, data, NULL);
-#else
-		bcmerror = wl_host_event(&dhd->pub, ifidx, pktdata, event, data, NULL);
-#endif/*BCM_PATCH_FOR_ETHERTYPE_SECURITY*/
 #endif /* SHOW_LOGTRACE */
 
 	if (bcmerror != BCME_OK)
