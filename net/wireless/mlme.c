@@ -625,9 +625,6 @@ int cfg80211_mlme_register_mgmt(struct wireless_dev *wdev, u32 snd_portid,
 
 void cfg80211_mlme_unregister_socket(struct wireless_dev *wdev, u32 nlportid)
 {
-        if (wdev == NULL){
-               return;
-        }
 	struct wiphy *wiphy = wdev->wiphy;
 	struct cfg80211_registered_device *rdev = wiphy_to_dev(wiphy);
 	struct cfg80211_mgmt_registration *reg, *tmp;
