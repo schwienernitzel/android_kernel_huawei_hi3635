@@ -400,10 +400,13 @@ CONFIG_NET_CORE=y
 CONFIG_WLAN=y
 CONFIG_WIRELESS=y
 CONFIG_BCMDHD=y
-CONFIG_BCM4334=y
+# CONFIG_BCM4334 is not set
+CONFIG_BCM4339=y
 CONFIG_WIFI_CONTROL_FUNC=y
-CONFIG_BCMDHD_FW_PATH="/vendor/firmware/fw_bcm4334_hw.bin"
-CONFIG_BCMDHD_NVRAM_PATH="/vendor/firmware/nvram4334_hw.txt"
+# CONFIG_BCMDHD_FW_PATH="/vendor/firmware/fw_bcm4334_hw.bin"
+# CONFIG_BCMDHD_NVRAM_PATH="/vendor/firmware/nvram4334_hw.txt"
+CONFIG_BCMDHD_FW_PATH="/vendor/firmware/fw_bcm4339_hw.bin"
+CONFIG_BCMDHD_NVRAM_PATH="/vendor/firmware/nvram4339_hw.txt"
 CONFIG_CFG80211=y
 CONFIG_BCM_VIO=y
 CONFIG_HW_WIFI_FREQ_CTRL_FLAG=y
